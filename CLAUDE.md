@@ -33,26 +33,50 @@ uv run python -m ingestion.analysis.run --alerts
 
 # Full pipeline with analysis
 uv run python -m ingestion.run_all --days-back 3 --analyze
+
+# Content machine: audit existing ad copy
+uv run python -m content.run --audit --print
+
+# Content machine: generate new ad copy variations
+uv run python -m content.run --generate --count 10
+
+# Content machine: generate for a specific product
+uv run python -m content.run --generate --product tungsten-tape --count 5
+
+# Content machine: score components after 7+ days of data
+uv run python -m content.run --score --print
+
+# Content machine: full cycle (audit -> generate -> score)
+uv run python -m content.run --all
 ```
 
 ## Architecture
 
 ### Data Flow
-Shopify API + Meta Ads API → BigQuery tables (9) → Unified views (8) → Claude analysis
+Shopify API + Meta Ads API → BigQuery tables (11) → Unified views (10) → Claude analysis → Content library
 
 ### BigQuery Tables (ingested)
 - `shopify_orders`, `shopify_order_line_items`, `shopify_products`, `shopify_product_variants`, `shopify_customers`
-- `meta_campaigns`, `meta_adsets`, `meta_ads`, `meta_daily_insights`
+- `meta_campaigns`, `meta_adsets`, `meta_ads`, `meta_daily_insights`, `meta_creatives`
+- `content_library`
 
 ### BigQuery Views (computed)
 - Phase 1: `vw_daily_performance`, `vw_true_roas`, `vw_product_performance`, `vw_trends`
 - Phase 2 (GA4): `vw_ga4_attribution`, `vw_enhanced_roas`, `vw_ga4_funnel`, `vw_ga4_product_insights`
+- Phase 3 (Content): `vw_creative_performance`, `vw_component_scores`
 
 ### Analysis Module
 - `analysis/claude_client.py` — thin wrapper, loads brand context from `config/brand.yaml`
 - `analysis/alerts.py` — 5 threshold checks (ROAS, CPA, spend, funnel, CTR), thresholds in `config/thresholds.yaml`
 - `analysis/weekly_strategy.py` — queries all views, sends to Claude for strategy report
 - `analysis/daily_report.py` — available but weekly cadence preferred (low order volume makes daily noisy)
+
+### Content Machine (Phase 3)
+- `content/audit.py` — audits existing ad creatives, extracts reusable components, populates library
+- `content/generator/generate.py` — AI-powered copy generation inspired by top performers
+- `content/scorer/score.py` — matches library components to live ads, scores performance, evolves library
+- `content/library/` — CSV files (hooks.csv, bodies.csv, ctas.csv) populated by audit
+- `content/generator/output/` — generated copy pending human review
 
 ## Key Conventions
 
@@ -77,7 +101,7 @@ Shopify API + Meta Ads API → BigQuery tables (9) → Unified views (8) → Cla
 
 - **Phase 1 (Data Pipeline):** COMPLETE — Shopify + Meta → BigQuery → 4 unified views
 - **Phase 2 (GA4 + AI Analysis):** COMPLETE — 4 GA4 views + Claude weekly reports + daily alerts
-- **Phase 3 (Content Machine):** Not started
+- **Phase 3 (Content Machine):** COMPLETE — creative text ingestion, content audit, AI copy generation, scoring feedback loop
 - **Phase 4 (Automated Optimization):** Not started
 - **Phase 5 (Autonomous Operation):** Not started
 

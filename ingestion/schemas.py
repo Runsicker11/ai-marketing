@@ -161,3 +161,37 @@ META_DAILY_INSIGHTS = [
     SchemaField("link_clicks", "INT64"),
     SchemaField("ingested_at", "TIMESTAMP"),
 ]
+
+META_CREATIVES = [
+    SchemaField("creative_id", "STRING", mode="REQUIRED"),
+    SchemaField("ad_id", "STRING"),
+    SchemaField("ad_name", "STRING"),
+    SchemaField("title", "STRING"),
+    SchemaField("body", "STRING"),
+    SchemaField("link_description", "STRING"),
+    SchemaField("cta_type", "STRING"),
+    SchemaField("image_url", "STRING"),
+    SchemaField("video_id", "STRING"),
+    SchemaField("thumbnail_url", "STRING"),
+    SchemaField("object_type", "STRING"),
+    SchemaField("page_id", "STRING"),
+    SchemaField("instagram_actor_id", "STRING"),
+    SchemaField("created_time", "TIMESTAMP"),
+    SchemaField("ingested_at", "TIMESTAMP"),
+]
+
+# ─── Content Library ───────────────────────────────────────
+
+CONTENT_LIBRARY = [
+    SchemaField("component_id", "STRING", mode="REQUIRED"),
+    SchemaField("component_type", "STRING"),  # hook, body, cta
+    SchemaField("text", "STRING"),
+    SchemaField("source", "STRING"),  # audit, generated, manual
+    SchemaField("source_ad_id", "STRING"),
+    SchemaField("source_ad_name", "STRING"),
+    SchemaField("score", "FLOAT64"),
+    SchemaField("status", "STRING"),  # active, proven, retired
+    SchemaField("product_focus", "STRING"),
+    SchemaField("created_at", "TIMESTAMP"),
+    SchemaField("updated_at", "TIMESTAMP"),
+]

@@ -19,6 +19,8 @@ TABLES = [
     ("meta_adsets", schemas.META_ADSETS, None, None),
     ("meta_ads", schemas.META_ADS, None, None),
     ("meta_daily_insights", schemas.META_DAILY_INSIGHTS, "date_start", ["campaign_id", "ad_id"]),
+    ("meta_creatives", schemas.META_CREATIVES, None, ["ad_id"]),
+    ("content_library", schemas.CONTENT_LIBRARY, None, ["component_type", "status"]),
 ]
 
 

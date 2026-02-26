@@ -62,42 +62,78 @@
 
 ---
 
-## Phase 3: Content Machine (Weeks 5-6)
+## Phase 3: Content Machine -- COMPLETE (Feb 25, 2026)
 
-### 3.1 Build the Content Library
-- [ ] Audit existing ads: extract hooks, body copy, CTAs that have performed well
-- [ ] Categorize by: product, audience segment, pain point, tone
-- [ ] Store in `content/library/` (CSV files) + mirror in BigQuery
-- [ ] Populate with at least 10 hooks, 10 bodies, 5 CTAs to start
+- [x] Pull creative text from Meta API (headline, primary text, CTA from `object_story_spec`)
+- [x] `meta_creatives` table: 430 creatives ingested, 29 linked to active ads
+- [x] `vw_creative_performance` view: creative text joined with ROAS, CTR, CPA + performance tiers
+- [x] Content audit module: Claude analyzes top/bottom performers, extracts reusable components
+- [x] Content library: `content/library/` CSVs + `content_library` BigQuery table
+- [x] AI copy generator: produces new hooks/bodies inspired by winners, validates char limits
+- [x] Scoring feedback loop: matches library components to live ads, promotes winners, retires losers
+- [x] `vw_component_scores` view for automated scoring
+- [x] CLI: `uv run python -m content.run --audit|--generate|--score|--all`
+- [x] Cost: ~$0.05 per full audit+generate cycle
 
-### 3.2 Combinatorial Generator
-- [ ] Build script: `content/generator/`
-      - Reads hooks.csv, bodies.csv, ctas.csv
-      - Generates all valid combinations
-      - Applies platform constraints:
-        - Google RSA: 30-char headlines, 90-char descriptions
-        - Meta: 125-char primary text, 40-char headline, 25-char CTA
-      - Filters out nonsensical combinations
-- [ ] Claude scores/ranks variations before testing
-- [ ] Output: ready-to-upload ad variations
+---
 
-### 3.3 AI Content Expansion
-- [ ] Feed top-performing ads + brand.yaml to Claude
-- [ ] Generate new hooks inspired by winners, in Braydon's voice
-- [ ] Generate product-specific variations (overgrips, tungsten tape, bundles)
-- [ ] Human review before any content goes live
+## Phase 3.5: Video Creative Intelligence (Planned)
 
-### 3.4 Performance Feedback Loop
-- [ ] Tag each live ad with component IDs (H003_B007_C002)
-- [ ] After 7-14 days, query BigQuery: which components win?
-- [ ] Feed results to Claude: "Hook #3 has 2x CTR. Generate more like it."
-- [ ] Archive losers, promote winners, generate new challengers
-- [ ] Track by product: do overgrip hooks differ from tungsten tape hooks?
+Braydon films all ad videos. Phase 3 only analyzes the **text wrapper** (headline, primary text, CTA). This phase adds analysis of the **video content itself** to understand why certain creatives win.
 
-### Phase 3 Exit Criteria
-> You have 50+ ad variations running across platforms.
-> You know which hooks, bodies, and CTAs work best by product.
-> New content is being generated faster than you can test it.
+### 3.5.1 Video Download Pipeline
+- [ ] Pull video download URLs from Meta API (`GET /{video_id}?fields=source`)
+- [ ] Download and cache MP4 files locally for analysis
+- [ ] Track which videos are already downloaded to avoid re-fetching
+- [ ] Research: API rate limits, video storage size, retention policy
+
+### 3.5.2 Audio Transcription
+- [ ] Extract audio from video files (ffmpeg)
+- [ ] Transcribe with Whisper (OpenAI API or local model)
+- [ ] Store transcripts alongside creative data in BigQuery
+- [ ] Capture: what Braydon says, verbal hooks, tone, pacing
+
+### 3.5.3 Visual Analysis
+- [ ] Extract key frames from videos (ffmpeg: thumbnail, 3s mark, midpoint, end)
+- [ ] Send frames to Claude (multimodal) for visual pattern analysis
+- [ ] Classify: format type (talking head, on-court demo, product close-up, unboxing)
+- [ ] Identify: visual hook (first 3 seconds), product presentation style, pacing
+
+### 3.5.4 Creative Pattern Analysis
+- [ ] Correlate video content patterns with performance data
+- [ ] Build a creative playbook: which formats, openings, demos drive ROAS
+- [ ] Example insights:
+  - "On-court demos in first 3 seconds → 2.5x higher ROAS than talking-head opens"
+  - "Videos under 20 seconds outperform longer ones by 1.8x"
+  - "Mentioning a specific stat in the first line boosts CTR 40%"
+- [ ] Feed playbook into content generation for more targeted copy suggestions
+
+### 3.5.5 Creative Recommendations
+- [ ] Suggest video + copy pairings based on what's worked
+- [ ] Recommend new video concepts based on winning patterns
+- [ ] Flag creative fatigue: same video running too long with declining CTR
+
+### Cost Estimate
+| Component | Per-video cost | 30 videos/cycle |
+|-----------|---------------|-----------------|
+| Video download | Free | Free |
+| Whisper transcription | ~$0.003 | ~$0.09 |
+| Frame extraction (ffmpeg) | Free | Free |
+| Claude multimodal analysis | ~$0.02-0.05 | ~$0.60-1.50 |
+| **Total** | | **~$1-2/cycle** |
+| Monthly (weekly cadence) | | **~$4-8/month** |
+
+### Open Questions
+- [ ] How much local storage needed for video cache?
+- [ ] Use OpenAI Whisper API vs. local whisper model? (cost vs. dependency tradeoff)
+- [ ] How far back to analyze? All historical videos or just last 90 days?
+- [ ] Can we detect on-screen text/overlays in addition to audio?
+- [ ] Integration with Phase 3 content generator: should video insights directly inform copy generation prompts?
+
+### Phase 3.5 Exit Criteria
+> You have a creative playbook derived from actual video performance data.
+> You know which video formats, openings, and styles drive the best ROAS.
+> Content generation is informed by both text AND video performance patterns.
 
 ---
 

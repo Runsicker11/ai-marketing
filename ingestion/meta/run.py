@@ -5,6 +5,7 @@ from datetime import date, timedelta
 
 from ingestion.meta.auth import validate_token
 from ingestion.meta.pull_campaigns import pull_campaigns, pull_adsets, pull_ads
+from ingestion.meta.pull_creatives import pull_creatives
 from ingestion.meta.pull_insights import pull_insights
 from ingestion.utils.bq_client import load_rows, full_replace, delete_date_range
 from ingestion.utils.logger import get_logger
@@ -28,6 +29,10 @@ def run(days_back: int = 3):
 
     ads = pull_ads()
     full_replace("meta_ads", ads, schemas.META_ADS)
+
+    # 2b. Pull and load creative text (full replace)
+    creatives = pull_creatives(ads)
+    full_replace("meta_creatives", creatives, schemas.META_CREATIVES)
 
     # 3. Pull and load daily insights (incremental)
     end_date = date.today() - timedelta(days=1)  # yesterday (today's data incomplete)

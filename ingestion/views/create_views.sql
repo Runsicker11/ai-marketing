@@ -300,6 +300,114 @@ FROM events
 GROUP BY report_date, source, medium
 ;
 
+-- ============================================================
+-- Phase 3: Content Machine Views
+-- ============================================================
+
+-- 9. vw_creative_performance
+-- Joins creative text with daily performance data
+-- Shows headline/body alongside ROAS, CTR, CPA per creative
+CREATE OR REPLACE VIEW `{dataset}.vw_creative_performance` AS
+WITH creative_daily AS (
+    SELECT
+        i.ad_id,
+        i.ad_name,
+        SUM(i.spend) AS lifetime_spend,
+        SUM(i.impressions) AS lifetime_impressions,
+        SUM(i.clicks) AS lifetime_clicks,
+        SUM(i.purchases) AS lifetime_purchases,
+        SUM(i.purchase_value) AS lifetime_revenue,
+        SAFE_DIVIDE(SUM(i.purchase_value), SUM(i.spend)) AS lifetime_roas,
+        SAFE_DIVIDE(SUM(i.clicks), SUM(i.impressions)) * 100 AS lifetime_ctr,
+        SAFE_DIVIDE(SUM(i.spend), SUM(i.purchases)) AS lifetime_cpa,
+        MIN(i.date_start) AS first_date,
+        MAX(i.date_start) AS last_date,
+        COUNT(DISTINCT i.date_start) AS days_active
+    FROM `{dataset}.meta_daily_insights` i
+    WHERE i.spend > 0
+    GROUP BY i.ad_id, i.ad_name
+)
+SELECT
+    c.creative_id,
+    c.ad_id,
+    cd.ad_name,
+    c.title AS headline,
+    c.body AS primary_text,
+    c.cta_type,
+    c.object_type,
+    c.video_id,
+    cd.lifetime_spend,
+    cd.lifetime_impressions,
+    cd.lifetime_clicks,
+    cd.lifetime_purchases,
+    cd.lifetime_revenue,
+    cd.lifetime_roas,
+    cd.lifetime_ctr,
+    cd.lifetime_cpa,
+    cd.first_date,
+    cd.last_date,
+    cd.days_active,
+    -- Performance tier
+    CASE
+        WHEN cd.lifetime_roas >= 3.0 THEN 'top_performer'
+        WHEN cd.lifetime_roas >= 2.0 THEN 'good'
+        WHEN cd.lifetime_roas >= 1.0 THEN 'marginal'
+        ELSE 'underperformer'
+    END AS performance_tier,
+    -- Health status
+    CASE
+        WHEN cd.days_active >= 14
+            AND cd.lifetime_ctr < 1.0 THEN 'possible_fatigue'
+        WHEN cd.lifetime_roas < 0.5
+            AND cd.lifetime_spend > 50 THEN 'cut_candidate'
+        ELSE 'healthy'
+    END AS health_status
+FROM `{dataset}.meta_creatives` c
+LEFT JOIN creative_daily cd ON c.ad_id = cd.ad_id
+;
+
+-- 10. vw_component_scores
+-- Matches content library components to live ad creatives via text matching
+-- Aggregates performance per component after 7+ days of data
+CREATE OR REPLACE VIEW `{dataset}.vw_component_scores` AS
+WITH component_matches AS (
+    SELECT
+        cl.component_id,
+        cl.component_type,
+        cl.text,
+        cp.creative_id,
+        cp.ad_id,
+        cp.ad_name,
+        cp.lifetime_roas,
+        cp.lifetime_ctr,
+        cp.lifetime_cpa,
+        cp.lifetime_spend,
+        cp.lifetime_purchases,
+        cp.days_active
+    FROM `{dataset}.content_library` cl
+    JOIN `{dataset}.vw_creative_performance` cp
+        ON (cl.component_type = 'hook' AND cp.headline IS NOT NULL
+            AND LOWER(TRIM(cl.text)) = LOWER(TRIM(cp.headline)))
+        OR (cl.component_type = 'body' AND cp.primary_text IS NOT NULL
+            AND LOWER(TRIM(cl.text)) = LOWER(TRIM(cp.primary_text)))
+    WHERE cp.days_active >= 7
+)
+SELECT
+    component_id,
+    component_type,
+    text,
+    COUNT(DISTINCT ad_id) AS ads_using,
+    SUM(lifetime_spend) AS total_spend,
+    SUM(lifetime_purchases) AS total_purchases,
+    SAFE_DIVIDE(SUM(lifetime_purchases * lifetime_roas * lifetime_spend),
+                SUM(lifetime_spend)) AS weighted_roas,
+    AVG(lifetime_ctr) AS avg_ctr,
+    AVG(lifetime_cpa) AS avg_cpa,
+    MAX(days_active) AS max_days_active
+FROM component_matches
+GROUP BY component_id, component_type, text
+;
+
 -- 8. vw_ga4_product_insights
 -- Product-level performance from GA4 events
 -- Shows products that get views but don't sell (unlike Shopify which only has sales data)
