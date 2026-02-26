@@ -1,0 +1,31 @@
+# Optimization Thresholds & Guardrails
+# These control when AI recommends or takes action
+
+alerts:
+  roas_floor: 1.5              # Alert if campaign ROAS drops below this
+  cpa_ceiling: 50.0            # Alert if CPA exceeds this (set to your target)
+  spend_anomaly_pct: 30        # Alert if daily spend deviates >30% from average
+  funnel_drop_pct: 20          # Alert if conversion rate drops >20% vs 7-day average
+  ctr_decline_days: 7          # Alert if CTR declines for this many consecutive days
+
+budget_rules:
+  max_daily_shift_pct: 20      # Never shift more than 20% of a campaign's budget per day
+  min_campaign_daily_spend: 10 # Never drop a campaign below $10/day
+  min_days_before_decision: 7  # Require at least 7 days of data before recommending changes
+
+creative_rules:
+  max_ad_age_days: 30          # Flag ads running longer than this
+  min_impressions_to_judge: 1000  # Need at least 1000 impressions before judging an ad
+  min_conversions_to_judge: 10    # Need at least 10 conversions for statistical confidence
+
+autonomy_levels:
+  # What the AI can do without asking you
+  auto_execute:
+    - "pause_ad_roas_below_0.5"      # Pause ads with ROAS below 0.5 (losing money fast)
+
+  # What the AI recommends and you approve
+  requires_approval:
+    - "budget_reallocation"
+    - "pause_campaign"
+    - "launch_new_creative"
+    - "keyword_changes"

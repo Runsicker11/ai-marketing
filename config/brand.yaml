@@ -1,0 +1,180 @@
+# Brand Configuration - Pickleball Effect
+
+brand_name: "Pickleball Effect"
+industry: "Pickleball equipment reviews & accessories"
+websites:
+  main: "https://pickleballeffect.com"
+  shop: "https://pickleballeffectshop.com"
+founder: "Braydon"
+
+# Revenue Streams
+revenue_model:
+  - "Affiliate commissions from paddle purchase links & discount codes"
+  - "Owned product sales (PE Products line via shop)"
+  - "YouTube channel (60,000+ monthly viewers)"
+  # TODO: Confirm - any sponsorship revenue? Course/membership revenue?
+
+# Brand Voice
+voice:
+  tone: "direct, authentic, no-BS, confident but approachable"
+  style: "conversational, data-backed, real-player perspective"
+  tagline: "Real testing. Real data. Real Braydon. Honest takes. No AI. No fluff."
+  principles:
+    - "Independent - reviews are earned, not bought"
+    - "Court-tested - every paddle reviewed has been played on court"
+    - "Specs verified in-house - not just repeating manufacturer claims"
+    - "Community-first - serving players, not brands"
+  avoid:
+    - "corporate marketing speak"
+    - "hype without substance"
+    - "unverified claims"
+    - "overly salesy language"
+    # TODO: Any specific words/phrases Braydon never uses?
+  examples:
+    - "If it's reviewed here, it's been tested on court."
+    - "All paddle specs are measured in-house for accuracy you can trust."
+    # TODO: Add more example sentences that capture Braydon's voice
+
+# Ideal Customer Profile
+icp:
+  primary_audience: "Pickleball players looking for honest, data-driven equipment guidance"
+  segments:
+    - name: "Beginners"
+      description: "New to pickleball, overwhelmed by paddle options"
+      pain_points:
+        - "Don't know which paddle to buy"
+        - "Confused by specs and marketing claims"
+        - "Don't want to waste money on wrong paddle"
+      goals:
+        - "Find the right first paddle"
+        - "Understand basic paddle differences"
+      content_angle: "Buyer's guides, fitting quiz, starter recommendations"
+
+    - name: "Intermediate/Competitive Players"
+      description: "Playing regularly, want to level up their equipment"
+      pain_points:
+        - "Outgrowing current paddle"
+        - "Hard to tell marketing hype from real performance"
+        - "Want to fine-tune their setup"
+      goals:
+        - "Find paddle that matches their play style"
+        - "Optimize with accessories (tungsten tape, grips)"
+        - "Data-driven comparison shopping"
+      content_angle: "Head-to-head comparisons, tuning lab, detailed reviews"
+
+    - name: "Gear Enthusiasts"
+      description: "Deep into the sport, follow every new paddle release"
+      pain_points:
+        - "Want to know specs before buying"
+        - "Need trusted independent source"
+      goals:
+        - "Stay on top of new releases"
+        - "Verify manufacturer specs"
+        - "Customize and tune their setup"
+      content_angle: "New release reviews, spec deep dives, tuning guides"
+
+  demographics:
+    age_range: "broad - all ages"
+    gender_split: "broad - both genders"
+    location: "US, spread throughout"
+    income_level: ""    # TODO: if known, helps with ad targeting
+    notes: "Pickleball has broad appeal across demographics. Targeting is passion-based (pickleball enthusiasts) rather than demographic-based."
+
+  objections:
+    - "Why should I trust this review over others?"
+    - "Is this just another affiliate site pushing expensive paddles?"
+    - "Do I really need accessories/tuning?"
+
+# Products (PE Products Line - Shop)
+offerings:
+  - name: "Comfort Tac Overgrip (4-Pack)"
+    category: "Grips"
+    key_benefits: ["Comfortable feel", "Tackiness", "Easy to apply"]
+    price_point: ""  # TODO
+
+  - name: "DryMax Grip"
+    category: "Grips"
+    key_benefits: ["Moisture-wicking", "Dry hands performance"]
+    price_point: ""  # TODO
+
+  - name: "Tungsten Tape Strips"
+    category: "Paddle Tuning"
+    key_benefits: ["Add weight precisely", "Customize swing weight", "Fine-tune balance"]
+    price_point: ""  # TODO
+
+  - name: "Edge Guard Tape"
+    category: "Protection"
+    variants: ["Narrow", "Standard", "Wide", "Custom"]
+    key_benefits: ["Protect paddle edges", "Multiple width options"]
+    price_point: ""  # TODO
+
+  - name: "SLYCE Adjustable Weighted SpeedCap"
+    category: "Paddle Tuning"
+    key_benefits: ["Adjustable weight", "Easy on/off", "Multiple weight options"]
+    price_point: ""  # TODO
+
+  - name: "Paddle Tuning Tape"
+    category: "Paddle Tuning"
+    key_benefits: ["Fine-tune paddle performance"]
+    price_point: ""  # TODO
+
+  - name: "Starter Pack Bundle"
+    category: "Bundles"
+    variants: ["Standard", "Custom"]
+    key_benefits: ["Everything you need in one purchase", "Value pricing"]
+    price_point: ""  # TODO
+
+# Content & Tools (Non-product offerings that drive traffic)
+content_assets:
+  - name: "Paddle Database"
+    url: "database section on main site"
+    description: "Searchable database of paddle specs and reviews"
+
+  - name: "Paddle Comparison Tool"
+    url: "comparison.pickleballeffect.com"
+    description: "Side-by-side paddle comparison with verified specs"
+
+  - name: "Paddle Fitting Quiz"
+    description: "Interactive quiz to match players with paddle recommendations"
+
+  - name: "Paddle Optimizer / Tuning Lab"
+    url: "tune.pickleballeffect.com"
+    description: "Tool for customizing and tuning paddle setup"
+
+  - name: "YouTube Channel"
+    description: "Video reviews and paddle content, 60K+ monthly viewers"
+
+# Competitors (accessory brands competing for same customer)
+competitors:
+  - name: "Bodhi Performance"
+    url: "https://bodhiperformance.com"
+    what_they_sell: "Overgrips (PROtack, DRYtack lines), paddles, accessories"
+    their_angle: "Premium performance branding, loyalty/rewards program, polished DTC storefront"
+    pe_differentiator: "PE has the trusted review platform driving traffic -- Bodhi is pure product, no content authority"
+
+  - name: "UDrippin"
+    url: "https://www.udrippin.com"
+    what_they_sell: "Overgrips, magnetic towels, apparel, sunglasses, footwear"
+    their_angle: "Wholesale/B2B model, broader lifestyle play beyond just pickleball"
+    pe_differentiator: "PE is DTC with a built-in audience of 60K+ engaged players. UDrippin is wholesale -- different model."
+
+  - name: "Flick Weight"
+    url: "https://www.flickweight.com"
+    what_they_sell: "Paddle handle weights (copper, tungsten, lead), edge tape"
+    their_angle: "Niche specialist in paddle weighting, performance-focused copy, multiple material options"
+    pe_differentiator: "PE sells tungsten tape + SLYCE caps in same category, but backed by Braydon's review credibility and tuning lab content"
+
+# Ad Platforms
+advertising:
+  platforms:
+    - "Google Ads"
+    - "Meta Ads (Facebook/Instagram)"
+  monthly_ad_spend: 2000
+  current_agency_spend: 3000
+  target_agency_spend: 1000  # After negotiation
+
+  primary_goal: "Drive purchases on Shopify shop (pickleballeffectshop.com)"
+  secondary_goals:
+    - "Build brand awareness in pickleball community"
+  current_performance: "Unknown - need to pull data from ad platforms to assess"
+  ecommerce_platform: "Shopify"

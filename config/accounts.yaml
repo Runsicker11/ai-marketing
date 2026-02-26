@@ -1,0 +1,26 @@
+# Ad Platform Account Configuration
+# IMPORTANT: Do NOT put actual API keys here. Use GCP Secret Manager.
+
+gcp:
+  project_id: ""
+  region: "us-central1"
+  bigquery_dataset: "marketing_data"
+
+google_ads:
+  customer_id: ""           # format: 123-456-7890
+  developer_token_secret: "google-ads-developer-token"  # Secret Manager key name
+  login_customer_id: ""     # MCC account ID if using manager account
+
+meta_ads:
+  account_id: ""            # format: act_123456789
+  app_id: ""
+  access_token_secret: "meta-ads-access-token"  # Secret Manager key name
+  api_version: "v22.0"
+
+shopify:
+  shop_domain: "pickleballeffectshop.myshopify.com"
+  # Post-Jan 2026: Shopify uses Client Credentials Grant (tokens expire every 24 hours)
+  # Our Cloud Functions will auto-generate a fresh token on each run using client_id + client_secret
+  client_id_secret: "shopify-client-id"           # Secret Manager key name
+  client_secret_secret: "shopify-client-secret"   # Secret Manager key name
+  api_version: "2025-01"

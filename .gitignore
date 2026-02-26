@@ -1,0 +1,26 @@
+# Secrets - NEVER commit these
+*.json.key
+.env
+!.env.template
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+.pytest_cache/
+
+# Generated reports (contain business data)
+reports/*.md
+
+# GCP
+service-account*.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
