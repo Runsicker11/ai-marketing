@@ -195,3 +195,76 @@ CONTENT_LIBRARY = [
     SchemaField("created_at", "TIMESTAMP"),
     SchemaField("updated_at", "TIMESTAMP"),
 ]
+
+# ─── Google Ads ────────────────────────────────────────────
+
+GOOGLE_ADS_CAMPAIGNS = [
+    SchemaField("campaign_id", "INT64", mode="REQUIRED"),
+    SchemaField("campaign_name", "STRING"),
+    SchemaField("campaign_type", "STRING"),  # SEARCH, SHOPPING, PERFORMANCE_MAX
+    SchemaField("bidding_strategy_type", "STRING"),
+    SchemaField("status", "STRING"),
+    SchemaField("budget_amount", "FLOAT64"),  # daily budget in USD
+    SchemaField("ingested_at", "TIMESTAMP"),
+]
+
+GOOGLE_ADS_AD_GROUPS = [
+    SchemaField("ad_group_id", "INT64", mode="REQUIRED"),
+    SchemaField("ad_group_name", "STRING"),
+    SchemaField("campaign_id", "INT64"),
+    SchemaField("campaign_name", "STRING"),
+    SchemaField("ad_group_type", "STRING"),
+    SchemaField("status", "STRING"),
+    SchemaField("cpc_bid_micros", "FLOAT64"),  # stored as USD after /1M conversion
+    SchemaField("ingested_at", "TIMESTAMP"),
+]
+
+GOOGLE_ADS_KEYWORDS = [
+    SchemaField("keyword_id", "INT64", mode="REQUIRED"),
+    SchemaField("keyword_text", "STRING"),
+    SchemaField("match_type", "STRING"),
+    SchemaField("ad_group_id", "INT64"),
+    SchemaField("campaign_id", "INT64"),
+    SchemaField("status", "STRING"),
+    SchemaField("quality_score", "INT64"),  # 1-10, NULL if insufficient data
+    SchemaField("expected_ctr", "STRING"),
+    SchemaField("ad_relevance", "STRING"),
+    SchemaField("landing_page_experience", "STRING"),
+    SchemaField("ingested_at", "TIMESTAMP"),
+]
+
+GOOGLE_ADS_DAILY_INSIGHTS = [
+    SchemaField("date_start", "DATE", mode="REQUIRED"),
+    SchemaField("campaign_id", "INT64"),
+    SchemaField("campaign_name", "STRING"),
+    SchemaField("campaign_type", "STRING"),
+    SchemaField("ad_group_id", "INT64"),
+    SchemaField("ad_group_name", "STRING"),
+    SchemaField("impressions", "INT64"),
+    SchemaField("clicks", "INT64"),
+    SchemaField("spend", "FLOAT64"),
+    SchemaField("cpc", "FLOAT64"),
+    SchemaField("ctr", "FLOAT64"),
+    SchemaField("conversions", "FLOAT64"),  # fractional (data-driven attribution)
+    SchemaField("conversion_value", "FLOAT64"),
+    SchemaField("cost_per_conversion", "FLOAT64"),
+    SchemaField("search_impression_share", "FLOAT64"),  # NULL for non-search
+    SchemaField("ingested_at", "TIMESTAMP"),
+]
+
+GOOGLE_ADS_SEARCH_TERMS = [
+    SchemaField("date_start", "DATE", mode="REQUIRED"),
+    SchemaField("search_term", "STRING"),
+    SchemaField("campaign_id", "INT64"),
+    SchemaField("campaign_name", "STRING"),
+    SchemaField("ad_group_id", "INT64"),
+    SchemaField("ad_group_name", "STRING"),
+    SchemaField("keyword_text", "STRING"),
+    SchemaField("match_type", "STRING"),
+    SchemaField("impressions", "INT64"),
+    SchemaField("clicks", "INT64"),
+    SchemaField("spend", "FLOAT64"),
+    SchemaField("conversions", "FLOAT64"),
+    SchemaField("conversion_value", "FLOAT64"),
+    SchemaField("ingested_at", "TIMESTAMP"),
+]

@@ -18,6 +18,8 @@ def main():
                         help="Only run Shopify ingestion")
     parser.add_argument("--meta-only", action="store_true",
                         help="Only run Meta Ads ingestion")
+    parser.add_argument("--google-only", action="store_true",
+                        help="Only run Google Ads ingestion")
     parser.add_argument("--views-only", action="store_true",
                         help="Only deploy views")
     parser.add_argument("--analyze", action="store_true",
@@ -26,8 +28,8 @@ def main():
                         help="Only run AI analysis (skip ingestion)")
     args = parser.parse_args()
 
-    run_all = not (args.shopify_only or args.meta_only or args.views_only
-                   or args.analyze_only)
+    run_all = not (args.shopify_only or args.meta_only or args.google_only
+                   or args.views_only or args.analyze_only)
 
     try:
         # Setup tables if requested
@@ -47,6 +49,12 @@ def main():
             log.info("=== Meta Ads Ingestion ===")
             from ingestion.meta.run import run as run_meta
             run_meta(days_back=args.days_back)
+
+        # Google Ads
+        if run_all or args.google_only:
+            log.info("=== Google Ads Ingestion ===")
+            from ingestion.google_ads.run import run as run_google
+            run_google(days_back=args.days_back)
 
         # Deploy views
         if run_all or args.views_only:

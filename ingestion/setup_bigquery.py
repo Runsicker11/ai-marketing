@@ -21,6 +21,12 @@ TABLES = [
     ("meta_daily_insights", schemas.META_DAILY_INSIGHTS, "date_start", ["campaign_id", "ad_id"]),
     ("meta_creatives", schemas.META_CREATIVES, None, ["ad_id"]),
     ("content_library", schemas.CONTENT_LIBRARY, None, ["component_type", "status"]),
+    # Google Ads
+    ("google_ads_campaigns", schemas.GOOGLE_ADS_CAMPAIGNS, None, ["status"]),
+    ("google_ads_ad_groups", schemas.GOOGLE_ADS_AD_GROUPS, None, ["campaign_id", "status"]),
+    ("google_ads_keywords", schemas.GOOGLE_ADS_KEYWORDS, None, ["campaign_id", "ad_group_id"]),
+    ("google_ads_daily_insights", schemas.GOOGLE_ADS_DAILY_INSIGHTS, "date_start", ["campaign_id", "ad_group_id"]),
+    ("google_ads_search_terms", schemas.GOOGLE_ADS_SEARCH_TERMS, "date_start", ["campaign_id", "ad_group_id"]),
 ]
 
 

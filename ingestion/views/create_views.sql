@@ -4,14 +4,14 @@
 -- ============================================================
 
 -- 1. vw_daily_performance
--- Meta spend/clicks/conversions by day/campaign/ad
--- UNION-ready for Google Ads later
+-- Unified daily performance across Meta + Google Ads
 CREATE OR REPLACE VIEW `{dataset}.vw_daily_performance` AS
 SELECT
     date_start AS report_date,
     'meta' AS platform,
     campaign_id,
     campaign_name,
+    CAST(NULL AS STRING) AS campaign_type,
     adset_id,
     adset_name,
     ad_id,
@@ -33,11 +33,40 @@ SELECT
     initiate_checkout_value,
     landing_page_views
 FROM `{dataset}.meta_daily_insights`
+UNION ALL
+SELECT
+    date_start AS report_date,
+    'google_ads' AS platform,
+    CAST(campaign_id AS STRING) AS campaign_id,
+    campaign_name,
+    campaign_type,
+    CAST(ad_group_id AS STRING) AS adset_id,
+    ad_group_name AS adset_name,
+    CAST(NULL AS STRING) AS ad_id,
+    CAST(NULL AS STRING) AS ad_name,
+    impressions,
+    clicks,
+    CAST(NULL AS INT64) AS link_clicks,
+    spend,
+    cpc,
+    CAST(NULL AS FLOAT64) AS cpm,
+    ctr,
+    CAST(NULL AS INT64) AS reach,
+    CAST(NULL AS FLOAT64) AS frequency,
+    conversions,
+    conversion_value,
+    CAST(NULL AS INT64) AS add_to_cart,
+    CAST(NULL AS FLOAT64) AS add_to_cart_value,
+    CAST(NULL AS INT64) AS initiate_checkout,
+    CAST(NULL AS FLOAT64) AS initiate_checkout_value,
+    CAST(NULL AS INT64) AS landing_page_views
+FROM `{dataset}.google_ads_daily_insights`
 ;
 
 -- 2. vw_true_roas
--- Meta spend vs actual Shopify revenue (UTM-attributed)
--- Shows the gap between Meta-reported and actual revenue
+-- Cross-platform spend vs actual Shopify revenue (UTM-attributed)
+-- Includes Meta + Google Ads spend with blended ROAS
+-- Backward compat: true_roas = blended_true_roas (referenced by vw_trends, weekly_strategy, daily_report, query_check)
 CREATE OR REPLACE VIEW `{dataset}.vw_true_roas` AS
 WITH meta_daily AS (
     SELECT
@@ -50,6 +79,17 @@ WITH meta_daily AS (
     FROM `{dataset}.meta_daily_insights`
     GROUP BY date_start
 ),
+google_daily AS (
+    SELECT
+        date_start AS report_date,
+        SUM(spend) AS google_spend,
+        SUM(impressions) AS google_impressions,
+        SUM(clicks) AS google_clicks,
+        SUM(conversions) AS google_conversions,
+        SUM(conversion_value) AS google_conversion_value
+    FROM `{dataset}.google_ads_daily_insights`
+    GROUP BY date_start
+),
 shopify_meta AS (
     SELECT
         order_date AS report_date,
@@ -59,24 +99,54 @@ shopify_meta AS (
     WHERE LOWER(COALESCE(utm_source, '')) IN ('facebook', 'fb', 'ig', 'instagram', 'meta')
         AND financial_status NOT IN ('refunded', 'voided')
     GROUP BY order_date
+),
+shopify_google AS (
+    SELECT
+        order_date AS report_date,
+        COUNT(*) AS shopify_google_orders,
+        SUM(total_price) AS shopify_google_revenue
+    FROM `{dataset}.shopify_orders`
+    WHERE LOWER(COALESCE(utm_source, '')) = 'google'
+        AND LOWER(COALESCE(utm_medium, '')) IN ('cpc', 'ppc', 'paid')
+        AND financial_status NOT IN ('refunded', 'voided')
+    GROUP BY order_date
 )
 SELECT
-    COALESCE(m.report_date, s.report_date) AS report_date,
+    COALESCE(m.report_date, g.report_date, sm.report_date, sg.report_date) AS report_date,
+    -- Meta
     m.meta_spend,
     m.meta_impressions,
     m.meta_clicks,
     m.meta_reported_purchases,
     m.meta_reported_revenue,
-    s.shopify_orders AS shopify_meta_orders,
-    s.shopify_meta_revenue,
-    -- True ROAS = actual Shopify revenue / ad spend
-    SAFE_DIVIDE(s.shopify_meta_revenue, m.meta_spend) AS true_roas,
-    -- Meta-reported ROAS (the inflated number)
+    sm.shopify_orders AS shopify_meta_orders,
+    sm.shopify_meta_revenue,
+    SAFE_DIVIDE(sm.shopify_meta_revenue, m.meta_spend) AS meta_true_roas,
     SAFE_DIVIDE(m.meta_reported_revenue, m.meta_spend) AS meta_reported_roas,
-    -- Revenue gap: how much Meta over-reports
-    COALESCE(m.meta_reported_revenue, 0) - COALESCE(s.shopify_meta_revenue, 0) AS revenue_gap
+    COALESCE(m.meta_reported_revenue, 0) - COALESCE(sm.shopify_meta_revenue, 0) AS revenue_gap,
+    -- Google Ads
+    g.google_spend,
+    g.google_impressions,
+    g.google_clicks,
+    g.google_conversions,
+    g.google_conversion_value,
+    sg.shopify_google_orders,
+    sg.shopify_google_revenue,
+    SAFE_DIVIDE(sg.shopify_google_revenue, g.google_spend) AS google_true_roas,
+    -- Blended
+    SAFE_DIVIDE(
+        COALESCE(sm.shopify_meta_revenue, 0) + COALESCE(sg.shopify_google_revenue, 0),
+        COALESCE(m.meta_spend, 0) + COALESCE(g.google_spend, 0)
+    ) AS blended_true_roas,
+    -- Backward compat: true_roas = blended_true_roas
+    SAFE_DIVIDE(
+        COALESCE(sm.shopify_meta_revenue, 0) + COALESCE(sg.shopify_google_revenue, 0),
+        COALESCE(m.meta_spend, 0) + COALESCE(g.google_spend, 0)
+    ) AS true_roas
 FROM meta_daily m
-FULL OUTER JOIN shopify_meta s ON m.report_date = s.report_date
+FULL OUTER JOIN google_daily g ON m.report_date = g.report_date
+FULL OUTER JOIN shopify_meta sm ON COALESCE(m.report_date, g.report_date) = sm.report_date
+FULL OUTER JOIN shopify_google sg ON COALESCE(m.report_date, g.report_date) = sg.report_date
 ;
 
 -- 3. vw_product_performance
@@ -200,7 +270,7 @@ LEFT JOIN `{dataset}.shopify_orders` o
 
 -- 6. vw_enhanced_roas
 -- Uses GA4 attribution (not Shopify UTMs) to assign revenue to channels
--- Then joins with Meta spend for true ROAS by channel
+-- Then joins with Meta + Google Ads spend for true ROAS by channel
 CREATE OR REPLACE VIEW `{dataset}.vw_enhanced_roas` AS
 WITH ga4_revenue AS (
     SELECT
@@ -239,16 +309,32 @@ meta_spend AS (
         SUM(spend) AS ad_spend
     FROM `{dataset}.meta_daily_insights`
     GROUP BY date_start
+),
+google_spend AS (
+    SELECT
+        date_start AS report_date,
+        SUM(spend) AS ad_spend
+    FROM `{dataset}.google_ads_daily_insights`
+    GROUP BY date_start
 )
 SELECT
     c.report_date,
     c.channel,
     c.ga4_attributed_revenue,
     c.ga4_attributed_orders,
-    CASE WHEN c.channel = 'meta' THEN m.ad_spend ELSE NULL END AS ad_spend,
-    CASE WHEN c.channel = 'meta' THEN SAFE_DIVIDE(c.ga4_attributed_revenue, m.ad_spend) ELSE NULL END AS enhanced_roas
+    CASE
+        WHEN c.channel = 'meta' THEN m.ad_spend
+        WHEN c.channel = 'google_ads' THEN g.ad_spend
+        ELSE NULL
+    END AS ad_spend,
+    CASE
+        WHEN c.channel = 'meta' THEN SAFE_DIVIDE(c.ga4_attributed_revenue, m.ad_spend)
+        WHEN c.channel = 'google_ads' THEN SAFE_DIVIDE(c.ga4_attributed_revenue, g.ad_spend)
+        ELSE NULL
+    END AS enhanced_roas
 FROM channel_daily c
 LEFT JOIN meta_spend m ON c.report_date = m.report_date AND c.channel = 'meta'
+LEFT JOIN google_spend g ON c.report_date = g.report_date AND c.channel = 'google_ads'
 ;
 
 -- 7. vw_ga4_funnel
@@ -437,4 +523,85 @@ SELECT
     AVG(price) AS avg_price
 FROM product_events
 GROUP BY item_name, item_id
+;
+
+-- ============================================================
+-- Google Ads Views
+-- ============================================================
+
+-- 11. vw_google_ads_keywords
+-- Keyword performance with quality scores and performance tiers
+-- Aggregates search term data per keyword with ROAS, CPA, CTR
+CREATE OR REPLACE VIEW `{dataset}.vw_google_ads_keywords` AS
+WITH keyword_perf AS (
+    SELECT
+        st.keyword_text,
+        st.campaign_id,
+        st.campaign_name,
+        st.ad_group_id,
+        st.ad_group_name,
+        SUM(st.impressions) AS total_impressions,
+        SUM(st.clicks) AS total_clicks,
+        SUM(st.spend) AS total_spend,
+        SUM(st.conversions) AS total_conversions,
+        SUM(st.conversion_value) AS total_conversion_value,
+        SAFE_DIVIDE(SUM(st.clicks), SUM(st.impressions)) AS avg_ctr,
+        SAFE_DIVIDE(SUM(st.spend), SUM(st.conversions)) AS avg_cpa,
+        SAFE_DIVIDE(SUM(st.conversion_value), SUM(st.spend)) AS roas,
+        COUNT(DISTINCT st.date_start) AS days_active
+    FROM `{dataset}.google_ads_search_terms` st
+    GROUP BY st.keyword_text, st.campaign_id, st.campaign_name, st.ad_group_id, st.ad_group_name
+)
+SELECT
+    kp.keyword_text,
+    kp.campaign_id,
+    kp.campaign_name,
+    kp.ad_group_id,
+    kp.ad_group_name,
+    kp.total_impressions,
+    kp.total_clicks,
+    kp.total_spend,
+    kp.total_conversions,
+    kp.total_conversion_value,
+    kp.avg_ctr,
+    kp.avg_cpa,
+    kp.roas,
+    kp.days_active,
+    k.quality_score,
+    k.expected_ctr,
+    k.ad_relevance,
+    k.landing_page_experience,
+    CASE
+        WHEN kp.roas >= 3.0 AND kp.total_conversions >= 3 THEN 'top_performer'
+        WHEN kp.roas >= 2.0 AND kp.total_conversions >= 1 THEN 'good'
+        WHEN kp.roas >= 1.0 THEN 'marginal'
+        WHEN kp.total_spend > 10 AND kp.total_conversions = 0 THEN 'wasted_spend'
+        ELSE 'underperformer'
+    END AS performance_tier
+FROM keyword_perf kp
+LEFT JOIN `{dataset}.google_ads_keywords` k
+    ON kp.keyword_text = k.keyword_text
+    AND kp.ad_group_id = k.ad_group_id
+;
+
+-- 12. vw_search_terms_waste
+-- Search terms with spend but zero conversions — negative keyword candidates
+-- Immediately actionable: add as negative keywords to stop budget waste
+CREATE OR REPLACE VIEW `{dataset}.vw_search_terms_waste` AS
+SELECT
+    search_term,
+    SUM(impressions) AS total_impressions,
+    SUM(clicks) AS total_clicks,
+    SUM(spend) AS total_spend,
+    SUM(conversions) AS total_conversions,
+    SAFE_DIVIDE(SUM(clicks), SUM(impressions)) AS avg_ctr,
+    COUNT(DISTINCT date_start) AS days_seen,
+    ARRAY_AGG(DISTINCT campaign_name IGNORE NULLS) AS campaigns,
+    ARRAY_AGG(DISTINCT keyword_text IGNORE NULLS) AS matched_keywords
+FROM `{dataset}.google_ads_search_terms`
+WHERE spend > 0
+GROUP BY search_term
+HAVING SUM(conversions) = 0
+    AND SUM(spend) >= 5
+ORDER BY total_spend DESC
 ;

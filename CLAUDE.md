@@ -19,8 +19,11 @@ AI marketing automation for **Pickleball Effect** — a pickleball paddle review
 # Install dependencies
 uv sync
 
-# Full pipeline: ingest Shopify + Meta → BigQuery → deploy views
+# Full pipeline: ingest Shopify + Meta + Google Ads → BigQuery → deploy views
 uv run python -m ingestion.run_all --days-back 3
+
+# Google Ads only
+uv run python -m ingestion.run_all --google-only --days-back 3
 
 # Deploy BigQuery views only
 uv run python -m ingestion.run_all --views-only
@@ -53,17 +56,19 @@ uv run python -m content.run --all
 ## Architecture
 
 ### Data Flow
-Shopify API + Meta Ads API → BigQuery tables (11) → Unified views (10) → Claude analysis → Content library
+Shopify API + Meta Ads API + Google Ads API → BigQuery tables (16) → Unified views (12) → Claude analysis → Content library
 
 ### BigQuery Tables (ingested)
 - `shopify_orders`, `shopify_order_line_items`, `shopify_products`, `shopify_product_variants`, `shopify_customers`
 - `meta_campaigns`, `meta_adsets`, `meta_ads`, `meta_daily_insights`, `meta_creatives`
+- `google_ads_campaigns`, `google_ads_ad_groups`, `google_ads_keywords`, `google_ads_daily_insights`, `google_ads_search_terms`
 - `content_library`
 
 ### BigQuery Views (computed)
-- Phase 1: `vw_daily_performance`, `vw_true_roas`, `vw_product_performance`, `vw_trends`
-- Phase 2 (GA4): `vw_ga4_attribution`, `vw_enhanced_roas`, `vw_ga4_funnel`, `vw_ga4_product_insights`
+- Phase 1: `vw_daily_performance` (cross-platform), `vw_true_roas` (cross-platform), `vw_product_performance`, `vw_trends`
+- Phase 2 (GA4): `vw_ga4_attribution`, `vw_enhanced_roas` (cross-platform), `vw_ga4_funnel`, `vw_ga4_product_insights`
 - Phase 3 (Content): `vw_creative_performance`, `vw_component_scores`
+- Google Ads: `vw_google_ads_keywords`, `vw_search_terms_waste`
 
 ### Analysis Module
 - `analysis/claude_client.py` — thin wrapper, loads brand context from `config/brand.yaml`
@@ -95,13 +100,16 @@ Shopify API + Meta Ads API → BigQuery tables (11) → Unified views (10) → C
 - **Windows console** needs `sys.stdout.reconfigure(encoding="utf-8")` for Unicode output
 - **`.env` override** is enabled (`load_dotenv(override=True)`) so `.env` always wins over system env vars
 - **Meta access token** is long-lived (60 days), expires ~Apr 26, 2026 — needs periodic refresh
-- **Google Ads** developer token is pending (applied for basic access) — not yet integrated
+- **Google Ads** `cost_micros` everywhere — `cost_micros`, `average_cpc`, `cost_per_conversion`, `cpc_bid_micros`, `budget.amount_micros` all need `/ 1_000_000`
+- **Google Ads** `ad_group.type_` has trailing underscore (`type` is Python reserved word)
+- **Google Ads** conversions are FLOAT64 (data-driven attribution gives fractional values)
 
 ## Phase Status
 
-- **Phase 1 (Data Pipeline):** COMPLETE — Shopify + Meta → BigQuery → 4 unified views
+- **Phase 1 (Data Pipeline):** COMPLETE — Shopify + Meta + Google Ads → BigQuery → 12 unified views
 - **Phase 2 (GA4 + AI Analysis):** COMPLETE — 4 GA4 views + Claude weekly reports + daily alerts
 - **Phase 3 (Content Machine):** COMPLETE — creative text ingestion, content audit, AI copy generation, scoring feedback loop
+- **Google Ads Pipeline:** COMPLETE — campaigns, ad groups, keywords, daily insights, search terms + 2 keyword/waste views
 - **Phase 4 (Automated Optimization):** Not started
 - **Phase 5 (Autonomous Operation):** Not started
 
