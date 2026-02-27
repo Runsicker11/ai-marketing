@@ -8,6 +8,14 @@ alerts:
   funnel_drop_pct: 20          # Alert if conversion rate drops >20% vs 7-day average
   ctr_decline_days: 7          # Alert if CTR declines for this many consecutive days
 
+google_ads:
+  search_term_waste_ceiling: 20.0  # alert if >$20/week wasted on zero-conversion terms
+  quality_score_floor: 5           # alert if any keyword drops below this
+
+seo:
+  ranking_drop_threshold: 5        # positions lost to trigger alert
+  striking_distance_min_impressions: 100  # min impressions to consider a keyword
+
 budget_rules:
   max_daily_shift_pct: 20      # Never shift more than 20% of a campaign's budget per day
   min_campaign_daily_spend: 10 # Never drop a campaign below $10/day

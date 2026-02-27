@@ -268,3 +268,68 @@ GOOGLE_ADS_SEARCH_TERMS = [
     SchemaField("conversion_value", "FLOAT64"),
     SchemaField("ingested_at", "TIMESTAMP"),
 ]
+
+# ─── Google Search Console ───────────────────────────────
+
+SEARCH_CONSOLE_PERFORMANCE = [
+    SchemaField("query_date", "DATE", mode="REQUIRED"),
+    SchemaField("query", "STRING"),
+    SchemaField("page", "STRING"),
+    SchemaField("country", "STRING"),
+    SchemaField("device", "STRING"),
+    SchemaField("impressions", "INT64"),
+    SchemaField("clicks", "INT64"),
+    SchemaField("ctr", "FLOAT64"),
+    SchemaField("position", "FLOAT64"),
+    SchemaField("ingested_at", "TIMESTAMP"),
+]
+
+# ─── Content Posts (SEO tracking) ────────────────────────
+
+CONTENT_POSTS = [
+    SchemaField("post_id", "STRING", mode="REQUIRED"),
+    SchemaField("platform", "STRING"),       # wordpress | shopify
+    SchemaField("title", "STRING"),
+    SchemaField("target_keyword", "STRING"),
+    SchemaField("content_type", "STRING"),    # review | comparison | how_to | landing_page
+    SchemaField("status", "STRING"),          # draft | published | performing | underperforming | retired
+    SchemaField("url", "STRING"),
+    SchemaField("word_count", "INT64"),
+    SchemaField("publish_date", "DATE"),
+    SchemaField("created_at", "TIMESTAMP"),
+    SchemaField("updated_at", "TIMESTAMP"),
+]
+
+# ─── Google Ads Ad Copy ──────────────────────────────────
+
+GOOGLE_ADS_AD_COPY = [
+    SchemaField("ad_id", "INT64", mode="REQUIRED"),
+    SchemaField("campaign_id", "INT64"),
+    SchemaField("campaign_name", "STRING"),
+    SchemaField("ad_group_id", "INT64"),
+    SchemaField("ad_group_name", "STRING"),
+    SchemaField("ad_type", "STRING"),
+    SchemaField("asset_type", "STRING"),     # headline | description
+    SchemaField("asset_text", "STRING"),
+    SchemaField("performance_label", "STRING"),  # BEST | GOOD | LOW | LEARNING | UNRATED
+    SchemaField("ingested_at", "TIMESTAMP"),
+]
+
+# ─── Optimization Actions ────────────────────────────────
+
+OPTIMIZATION_ACTIONS = [
+    SchemaField("action_id", "STRING", mode="REQUIRED"),
+    SchemaField("action_type", "STRING"),    # add_negative_keyword | adjust_bid | pause_keyword | shift_budget
+    SchemaField("platform", "STRING"),       # google_ads | meta
+    SchemaField("entity_id", "STRING"),      # campaign_id, keyword_id, etc.
+    SchemaField("entity_name", "STRING"),
+    SchemaField("current_value", "STRING"),
+    SchemaField("proposed_value", "STRING"),
+    SchemaField("rationale", "STRING"),
+    SchemaField("expected_impact", "STRING"),
+    SchemaField("risk_level", "STRING"),     # low | medium | high
+    SchemaField("status", "STRING"),         # proposed | approved | executed | rejected
+    SchemaField("proposed_at", "TIMESTAMP"),
+    SchemaField("decided_at", "TIMESTAMP"),
+    SchemaField("executed_at", "TIMESTAMP"),
+]

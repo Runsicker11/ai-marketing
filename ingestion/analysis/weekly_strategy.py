@@ -16,7 +16,7 @@ _DS = f"{GCP_PROJECT_ID}.{BQ_DATASET}"
 SYSTEM_PROMPT = """\
 You are a senior marketing strategist for a DTC pickleball accessories brand. \
 You produce weekly strategy reports that guide the next week's ad spend, \
-creative direction, and product focus.
+creative direction, product focus, and SEO strategy.
 
 Report format:
 1. **Week in Review** (key wins, losses, overall trajectory)
@@ -25,8 +25,11 @@ Report format:
 4. **Product Strategy** (which products to push, which to deprioritize, based on funnel data)
 5. **Funnel Optimization** (biggest drop-off points, specific fixes to test)
 6. **Creative Direction** (what's working, what's fatigued, what to test next)
-7. **Competitive Context** (how our metrics compare to expectations)
-8. **Next Week Priorities** (top 3-5 specific actions ranked by expected impact)
+7. **Google Ads Keyword Strategy** (top keywords to expand, wasted spend to cut, quality score issues)
+8. **Negative Keyword Recommendations** (search terms wasting money — list exact terms to add as negatives)
+9. **SEO Opportunities** (striking-distance keywords, content gaps, ranking changes)
+10. **Competitive Context** (how our metrics compare to expectations)
+11. **Next Week Priorities** (top 3-5 specific actions ranked by expected impact)
 
 Use exact numbers. Be specific about dollar amounts and percentages. \
 Recommend bold moves when the data supports them, but flag risks clearly.\
@@ -150,6 +153,84 @@ def _query_weekly_ads(week_start: date, week_end: date) -> str:
     return "\n".join(lines)
 
 
+def _query_keyword_performance() -> str:
+    """Get top and wasted keywords from Google Ads."""
+    sql = f"""
+    SELECT keyword_text, campaign_name, total_spend, total_conversions,
+           total_conversion_value, roas, avg_ctr, avg_cpa,
+           quality_score, performance_tier
+    FROM `{_DS}.vw_google_ads_keywords`
+    WHERE total_spend > 0
+    ORDER BY total_spend DESC
+    LIMIT 20
+    """
+    rows = list(run_query(sql))
+    if not rows:
+        return "No Google Ads keyword data available."
+    header = "keyword | campaign | spend | conv | value | roas | ctr | cpa | qs | tier"
+    lines = [header, "-" * len(header)]
+    for r in rows:
+        lines.append(
+            f"{r.keyword_text} | {r.campaign_name} | "
+            f"${r.total_spend or 0:.2f} | {r.total_conversions or 0:.1f} | "
+            f"${r.total_conversion_value or 0:.2f} | "
+            f"{r.roas or 0:.2f} | {r.avg_ctr or 0:.2%} | "
+            f"${r.avg_cpa or 0:.2f} | "
+            f"{r.quality_score or '-'} | {r.performance_tier}"
+        )
+    return "\n".join(lines)
+
+
+def _query_search_term_waste() -> str:
+    """Get search terms wasting budget (zero conversions)."""
+    sql = f"""
+    SELECT search_term, total_spend, total_clicks, total_impressions,
+           avg_ctr, days_seen
+    FROM `{_DS}.vw_search_terms_waste`
+    ORDER BY total_spend DESC
+    LIMIT 15
+    """
+    rows = list(run_query(sql))
+    if not rows:
+        return "No wasted search terms found."
+    header = "search_term | spend | clicks | impressions | ctr | days"
+    lines = [header, "-" * len(header)]
+    for r in rows:
+        lines.append(
+            f"{r.search_term} | ${r.total_spend or 0:.2f} | "
+            f"{r.total_clicks or 0} | {r.total_impressions or 0} | "
+            f"{r.avg_ctr or 0:.2%} | {r.days_seen or 0}"
+        )
+    return "\n".join(lines)
+
+
+def _query_seo_opportunities() -> str:
+    """Get striking-distance SEO keywords from Search Console."""
+    sql = f"""
+    SELECT query, page, avg_position, impressions_30d, clicks_30d,
+           ctr, opportunity_score
+    FROM `{_DS}.vw_seo_opportunities`
+    ORDER BY opportunity_score DESC
+    LIMIT 15
+    """
+    try:
+        rows = list(run_query(sql))
+    except Exception:
+        return "No SEO opportunity data available (Search Console not yet connected)."
+    if not rows:
+        return "No striking-distance keywords found."
+    header = "query | page | position | impressions | clicks | ctr | score"
+    lines = [header, "-" * len(header)]
+    for r in rows:
+        lines.append(
+            f"{r.query} | {r.page} | "
+            f"{r.avg_position or 0:.1f} | {r.impressions_30d or 0} | "
+            f"{r.clicks_30d or 0} | {r.ctr or 0:.2%} | "
+            f"{r.opportunity_score or 0:.1f}"
+        )
+    return "\n".join(lines)
+
+
 def _query_product_insights() -> str:
     sql = f"""
     SELECT item_name, product_views, add_to_carts, purchases, revenue,
@@ -198,13 +279,19 @@ def generate(week_end: date | None = None, to_stdout: bool = False) -> str:
     trends_data = _query_weekly_trends(week_start, week_end)
     ads_data = _query_weekly_ads(week_start, week_end)
     product_data = _query_product_insights()
+    keyword_data = _query_keyword_performance()
+    waste_data = _query_search_term_waste()
+    seo_data = _query_seo_opportunities()
 
     data_context = (
         f"### Weekly ROAS by Channel ({week_start} to {week_end})\n{roas_data}\n\n"
         f"### Weekly Funnel by Source\n{funnel_data}\n\n"
         f"### Daily Trends\n{trends_data}\n\n"
         f"### Ad Performance (Top 15)\n{ads_data}\n\n"
-        f"### Product Insights (Last 90 Days)\n{product_data}"
+        f"### Product Insights (Last 90 Days)\n{product_data}\n\n"
+        f"### Google Ads Keyword Performance\n{keyword_data}\n\n"
+        f"### Wasted Search Terms (Zero Conversions)\n{waste_data}\n\n"
+        f"### SEO Opportunities (Striking Distance)\n{seo_data}"
     )
 
     question = (

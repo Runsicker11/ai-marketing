@@ -27,6 +27,14 @@ TABLES = [
     ("google_ads_keywords", schemas.GOOGLE_ADS_KEYWORDS, None, ["campaign_id", "ad_group_id"]),
     ("google_ads_daily_insights", schemas.GOOGLE_ADS_DAILY_INSIGHTS, "date_start", ["campaign_id", "ad_group_id"]),
     ("google_ads_search_terms", schemas.GOOGLE_ADS_SEARCH_TERMS, "date_start", ["campaign_id", "ad_group_id"]),
+    # Search Console
+    ("search_console_performance", schemas.SEARCH_CONSOLE_PERFORMANCE, "query_date", ["query", "page"]),
+    # SEO Content Tracking
+    ("content_posts", schemas.CONTENT_POSTS, None, ["platform", "status"]),
+    # Google Ads Copy
+    ("google_ads_ad_copy", schemas.GOOGLE_ADS_AD_COPY, None, ["campaign_id", "ad_group_id"]),
+    # Optimization
+    ("optimization_actions", schemas.OPTIMIZATION_ACTIONS, None, ["action_type", "status"]),
 ]
 
 

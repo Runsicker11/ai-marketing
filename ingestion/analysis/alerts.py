@@ -180,6 +180,88 @@ def _check_ctr_decline(report_date: date, days: int) -> list[dict]:
     return alerts
 
 
+def _check_keyword_waste(report_date: date, ceiling: float) -> list[dict]:
+    """Check if wasted search term spend exceeds threshold."""
+    week_start = report_date - timedelta(days=6)
+    sql = f"""
+    SELECT search_term, SUM(spend) AS total_spend, SUM(clicks) AS total_clicks
+    FROM `{_DS}.google_ads_search_terms`
+    WHERE date_start BETWEEN '{week_start}' AND '{report_date}'
+        AND conversions = 0
+        AND spend > 0
+    GROUP BY search_term
+    HAVING SUM(spend) >= {ceiling}
+    ORDER BY total_spend DESC
+    LIMIT 10
+    """
+    alerts = []
+    for r in run_query(sql):
+        alerts.append({
+            "type": "KEYWORD_WASTE",
+            "severity": "medium",
+            "message": (
+                f"Search term '{r.search_term}' wasted "
+                f"${r.total_spend:.2f} this week with {r.total_clicks} clicks "
+                f"and zero conversions. Consider adding as negative keyword."
+            ),
+        })
+    return alerts
+
+
+def _check_quality_score_drop(report_date: date, floor: int) -> list[dict]:
+    """Check if any keyword's quality score dropped below floor."""
+    sql = f"""
+    SELECT keyword_text, quality_score, campaign_id, ad_group_id,
+           expected_ctr, ad_relevance, landing_page_experience
+    FROM `{_DS}.google_ads_keywords`
+    WHERE quality_score IS NOT NULL
+        AND quality_score > 0
+        AND quality_score < {floor}
+        AND status = 'ENABLED'
+    """
+    alerts = []
+    for r in run_query(sql):
+        alerts.append({
+            "type": "QUALITY_SCORE_LOW",
+            "severity": "medium",
+            "message": (
+                f"Keyword '{r.keyword_text}' quality score is {r.quality_score} "
+                f"(below {floor}). CTR: {r.expected_ctr}, "
+                f"Relevance: {r.ad_relevance}, "
+                f"Landing page: {r.landing_page_experience}"
+            ),
+        })
+    return alerts
+
+
+def _check_ranking_drop(report_date: date, threshold: int) -> list[dict]:
+    """Check if any key page lost positions week-over-week."""
+    sql = f"""
+    SELECT query, page, current_week_position, prior_week_position,
+           position_change
+    FROM `{_DS}.vw_seo_trends`
+    WHERE position_change >= {threshold}
+        AND current_week_impressions >= 50
+    ORDER BY position_change DESC
+    LIMIT 5
+    """
+    alerts = []
+    try:
+        for r in run_query(sql):
+            alerts.append({
+                "type": "RANKING_DROP",
+                "severity": "medium",
+                "message": (
+                    f"'{r.query}' dropped {r.position_change:.1f} positions "
+                    f"({r.prior_week_position:.1f} -> {r.current_week_position:.1f}) "
+                    f"on page: {r.page}"
+                ),
+            })
+    except Exception:
+        pass  # SEO views may not exist yet if Search Console not connected
+    return alerts
+
+
 def check(report_date: date | None = None, to_stdout: bool = False) -> str:
     """Run all threshold checks and generate alert report.
 
@@ -194,7 +276,10 @@ def check(report_date: date | None = None, to_stdout: bool = False) -> str:
         report_date = date.today() - timedelta(days=1)
 
     log.info(f"Running alert checks for {report_date}")
-    thresholds = _load_thresholds()
+    cfg = yaml.safe_load((_CONFIG_DIR / "thresholds.yaml").read_text(encoding="utf-8"))
+    thresholds = cfg.get("alerts", {})
+    google_ads_cfg = cfg.get("google_ads", {})
+    seo_cfg = cfg.get("seo", {})
 
     all_alerts = []
     all_alerts.extend(_check_roas_floor(report_date, thresholds.get("roas_floor", 1.5)))
@@ -202,6 +287,14 @@ def check(report_date: date | None = None, to_stdout: bool = False) -> str:
     all_alerts.extend(_check_spend_anomaly(report_date, thresholds.get("spend_anomaly_pct", 30)))
     all_alerts.extend(_check_funnel_drop(report_date, thresholds.get("funnel_drop_pct", 20)))
     all_alerts.extend(_check_ctr_decline(report_date, thresholds.get("ctr_decline_days", 7)))
+    # Google Ads alerts
+    all_alerts.extend(_check_keyword_waste(
+        report_date, google_ads_cfg.get("search_term_waste_ceiling", 20.0)))
+    all_alerts.extend(_check_quality_score_drop(
+        report_date, google_ads_cfg.get("quality_score_floor", 5)))
+    # SEO alerts
+    all_alerts.extend(_check_ranking_drop(
+        report_date, seo_cfg.get("ranking_drop_threshold", 5)))
 
     if not all_alerts:
         report = f"# Alerts — {report_date}\n\nNo alerts triggered. All metrics within thresholds."

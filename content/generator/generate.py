@@ -15,11 +15,29 @@ _DS = f"{GCP_PROJECT_ID}.{BQ_DATASET}"
 _LIBRARY_DIR = Path(__file__).resolve().parents[1] / "library"
 _OUTPUT_DIR = Path(__file__).resolve().parent / "output"
 
-# Meta ad platform constraints
-MAX_HEADLINE_CHARS = 40
-MAX_PRIMARY_TEXT_CHARS = 125
+# Platform-specific constraints
+PLATFORM_CONSTRAINTS = {
+    "meta": {
+        "max_headline": 40,
+        "max_primary_text": 125,
+        "headline_label": "headline",
+        "body_label": "primary text",
+    },
+    "google": {
+        "max_headline": 30,
+        "max_description": 90,
+        "max_headlines_per_rsa": 15,
+        "max_descriptions_per_rsa": 4,
+        "headline_label": "RSA headline",
+        "body_label": "RSA description",
+    },
+}
 
-SYSTEM_PROMPT = """\
+# Legacy aliases for backward compat
+MAX_HEADLINE_CHARS = PLATFORM_CONSTRAINTS["meta"]["max_headline"]
+MAX_PRIMARY_TEXT_CHARS = PLATFORM_CONSTRAINTS["meta"]["max_primary_text"]
+
+META_SYSTEM_PROMPT = """\
 You are a direct-response ad copywriter for Pickleball Effect, a DTC pickleball \
 accessories brand run by Braydon. You write in Braydon's voice: direct, authentic, \
 no-BS, confident but approachable. Real player perspective. No corporate speak.
@@ -28,8 +46,8 @@ You will receive top-performing ad copy components and brand/product context. \
 Generate new variations inspired by the winners.
 
 Rules:
-- Headlines must be {max_headline} characters or fewer
-- Primary text must be {max_primary_text} characters or fewer
+- Headlines must be 40 characters or fewer
+- Primary text must be 125 characters or fewer
 - Write in Braydon's authentic voice - like a friend recommending gear
 - Focus on benefits, not features
 - Use specific numbers/data when possible (e.g., "Tested on 50+ paddles")
@@ -42,7 +60,37 @@ hook,H_NEW_001,"Your headline text here"
 body,B_NEW_001,"Your primary text here"
 
 Generate the exact number requested. Every line must be valid CSV.\
-""".format(max_headline=MAX_HEADLINE_CHARS, max_primary_text=MAX_PRIMARY_TEXT_CHARS)
+"""
+
+GOOGLE_SYSTEM_PROMPT = """\
+You are a search ads copywriter for Pickleball Effect, a DTC pickleball \
+accessories brand. You write Google Responsive Search Ad (RSA) copy that \
+matches search intent — people actively looking for pickleball accessories.
+
+You will receive top-performing components and brand/product context. \
+Generate new variations optimized for search intent.
+
+Rules:
+- Headlines must be 30 characters or fewer (Google RSA limit)
+- Descriptions must be 90 characters or fewer (Google RSA limit)
+- Search intent: these people are actively looking for solutions
+- Include the product/keyword in at least half of headlines
+- Mix benefit-focused and feature-focused headlines
+- Descriptions should expand on benefits with specific proof points
+- No emojis, no ALL CAPS
+- Write with urgency but not desperation
+- Each variation must feel distinct
+
+Output format (CSV, one per line):
+TYPE,COMPONENT_ID,TEXT
+hook,GH_NEW_001,"Your 30-char headline"
+body,GD_NEW_001,"Your 90-char description"
+
+Generate the exact number requested. Every line must be valid CSV.\
+"""
+
+# Default for backward compat
+SYSTEM_PROMPT = META_SYSTEM_PROMPT
 
 
 def _load_top_components(min_score: float = 7.0) -> dict[str, list[dict]]:
@@ -131,8 +179,12 @@ def _format_winners(components: dict[str, list[dict]]) -> str:
     return "\n".join(lines) if lines else "No existing top performers found."
 
 
-def _parse_generated(claude_response: str) -> list[dict]:
+def _parse_generated(claude_response: str, platform: str = "meta") -> list[dict]:
     """Parse generated components from Claude's CSV output."""
+    constraints = PLATFORM_CONSTRAINTS.get(platform, PLATFORM_CONSTRAINTS["meta"])
+    max_hl = constraints.get("max_headline", constraints.get("max_headline", 40))
+    max_body = constraints.get("max_primary_text", constraints.get("max_description", 125))
+
     components = []
     for line in claude_response.split("\n"):
         stripped = line.strip()
@@ -153,59 +205,71 @@ def _parse_generated(claude_response: str) -> list[dict]:
         comp_id = row[1].strip()
         text = row[2].strip()
 
-        # Validate character limits
-        if comp_type == "hook" and len(text) > MAX_HEADLINE_CHARS:
-            log.warning(f"Headline too long ({len(text)} chars), truncating: {text}")
-            text = text[:MAX_HEADLINE_CHARS]
-        if comp_type == "body" and len(text) > MAX_PRIMARY_TEXT_CHARS:
-            log.warning(f"Primary text too long ({len(text)} chars), truncating: {text}")
-            text = text[:MAX_PRIMARY_TEXT_CHARS]
+        # Validate character limits based on platform
+        if comp_type == "hook" and len(text) > max_hl:
+            log.warning(f"Headline too long ({len(text)} chars, max {max_hl}), truncating: {text}")
+            text = text[:max_hl]
+        if comp_type == "body" and len(text) > max_body:
+            log.warning(f"Body too long ({len(text)} chars, max {max_body}), truncating: {text}")
+            text = text[:max_body]
 
         components.append({
             "component_type": comp_type,
             "component_id": comp_id,
             "text": text,
+            "platform": platform,
         })
 
     return components
 
 
-def _save_pending_review(components: list[dict], product: str | None):
+def _save_pending_review(components: list[dict], product: str | None,
+                         platform: str = "meta"):
     """Save generated components to pending_review.csv."""
     _OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     suffix = f"_{product}" if product else ""
-    path = _OUTPUT_DIR / f"pending_review{suffix}_{timestamp}.csv"
+    path = _OUTPUT_DIR / f"pending_review_{platform}{suffix}_{timestamp}.csv"
 
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["component_id", "component_type", "text", "status", "generated_at"])
+        writer.writerow(["component_id", "component_type", "text", "platform",
+                          "status", "generated_at"])
         for c in components:
             writer.writerow([
                 c["component_id"],
                 c["component_type"],
                 c["text"],
+                platform,
                 "pending_review",
                 datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
             ])
 
-    log.info(f"Saved {len(components)} generated components to {path}")
+    log.info(f"Saved {len(components)} {platform} components to {path}")
     return path
 
 
 def generate(count: int = 10, product: str | None = None,
+             platform: str = "meta",
              to_stdout: bool = False) -> list[dict]:
     """Generate new ad copy variations inspired by top performers.
 
     Args:
         count: Number of variations to generate (split between hooks and bodies).
         product: Optional product name for targeted generation.
+        platform: Ad platform — 'meta' or 'google'.
         to_stdout: Print results instead of saving.
 
     Returns:
         List of generated component dicts.
     """
-    log.info(f"Generating {count} new variations"
+    constraints = PLATFORM_CONSTRAINTS.get(platform, PLATFORM_CONSTRAINTS["meta"])
+    max_hl = constraints.get("max_headline", constraints.get("max_headline", 40))
+    max_body = constraints.get("max_primary_text", constraints.get("max_description", 125))
+    hl_label = constraints.get("headline_label", "headline")
+    body_label = constraints.get("body_label", "primary text")
+
+    log.info(f"Generating {count} new {platform} variations"
              f"{f' for {product}' if product else ''}")
 
     # Load inputs
@@ -221,16 +285,27 @@ def generate(count: int = 10, product: str | None = None,
         f"## Product Context\n{product_context}"
     )
 
-    question = (
-        f"Generate exactly {hooks_count} new hooks (headlines) and "
-        f"{bodies_count} new bodies (primary text) for Meta ads. "
-        f"{'Focus on ' + product + '. ' if product else ''}"
-        f"Inspire from the winners above but create distinct variations. "
-        f"Use Braydon's voice. Output as CSV only."
-    )
+    if platform == "google":
+        sys_prompt = GOOGLE_SYSTEM_PROMPT
+        question = (
+            f"Generate exactly {hooks_count} new RSA headlines (max 30 chars) and "
+            f"{bodies_count} new RSA descriptions (max 90 chars) for Google Ads. "
+            f"{'Focus on ' + product + '. ' if product else ''}"
+            f"These are for search ads — match search intent. "
+            f"Output as CSV only."
+        )
+    else:
+        sys_prompt = META_SYSTEM_PROMPT
+        question = (
+            f"Generate exactly {hooks_count} new hooks (headlines) and "
+            f"{bodies_count} new bodies (primary text) for Meta ads. "
+            f"{'Focus on ' + product + '. ' if product else ''}"
+            f"Inspire from the winners above but create distinct variations. "
+            f"Use Braydon's voice. Output as CSV only."
+        )
 
-    response = analyze(SYSTEM_PROMPT, data_context, question)
-    components = _parse_generated(response)
+    response = analyze(sys_prompt, data_context, question)
+    components = _parse_generated(response, platform=platform)
 
     if not components:
         log.warning("No components parsed from Claude's response")
@@ -239,21 +314,21 @@ def generate(count: int = 10, product: str | None = None,
             print(response)
         return []
 
-    log.info(f"Generated {len(components)} components "
-             f"({sum(1 for c in components if c['component_type'] == 'hook')} hooks, "
-             f"{sum(1 for c in components if c['component_type'] == 'body')} bodies)")
+    log.info(f"Generated {len(components)} {platform} components "
+             f"({sum(1 for c in components if c['component_type'] == 'hook')} {hl_label}s, "
+             f"{sum(1 for c in components if c['component_type'] == 'body')} {body_label}s)")
 
     if to_stdout:
         print(f"\n{'='*60}")
-        print(f"Generated {len(components)} ad copy variations")
+        print(f"Generated {len(components)} {platform.upper()} ad copy variations")
         print(f"{'='*60}")
         for c in components:
-            label = "HEADLINE" if c["component_type"] == "hook" else "PRIMARY TEXT"
+            label = hl_label.upper() if c["component_type"] == "hook" else body_label.upper()
             char_count = len(c["text"])
-            limit = MAX_HEADLINE_CHARS if c["component_type"] == "hook" else MAX_PRIMARY_TEXT_CHARS
+            limit = max_hl if c["component_type"] == "hook" else max_body
             print(f"\n[{c['component_id']}] {label} ({char_count}/{limit} chars)")
             print(f"  {c['text']}")
     else:
-        _save_pending_review(components, product)
+        _save_pending_review(components, product, platform=platform)
 
     return components

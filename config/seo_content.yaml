@@ -1,0 +1,42 @@
+# SEO Content Pipeline Configuration
+# Controls AI content generation rules for consistency and brand alignment
+
+content_types:
+  review:
+    word_count: [1500, 2500]
+    required_sections: [intro, specs, testing, pros_cons, verdict, faq]
+    heading_structure: "H1 (product name) -> H2 sections -> H3 subsections"
+    keyword_placement: [title, h1, first_paragraph, meta_description, conclusion]
+    internal_links_min: 3
+    template: "templates/review.md"
+
+  comparison:
+    word_count: [1200, 2000]
+    required_sections: [intro, side_by_side, testing, verdict, faq]
+    keyword_placement: [title, h1, first_paragraph, comparison_table]
+    internal_links_min: 2
+    template: "templates/comparison.md"
+
+  how_to:
+    word_count: [800, 1500]
+    required_sections: [intro, steps, tips, faq]
+    keyword_placement: [title, h1, first_paragraph, step_headings]
+    internal_links_min: 2
+    template: "templates/how_to.md"
+
+  landing_page:
+    word_count: [300, 800]
+    required_sections: [hero, benefits, social_proof, cta]
+    keyword_placement: [title, h1, meta_description, cta]
+    internal_links_min: 1
+    template: "templates/landing_page.md"
+
+seo_rules:
+  title_max_chars: 60
+  meta_description_max_chars: 155
+  keyword_density_range: [0.5, 2.0]  # percent
+  readability_target: "grade_8"       # Flesch-Kincaid
+  image_alt_required: true
+
+# Human review gate: always require review before publishing
+review_gate: always  # always | confidence_threshold | auto

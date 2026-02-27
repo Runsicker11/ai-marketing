@@ -605,3 +605,314 @@ HAVING SUM(conversions) = 0
     AND SUM(spend) >= 5
 ORDER BY total_spend DESC
 ;
+
+-- ============================================================
+-- Phase 4: SEO Views (Search Console)
+-- ============================================================
+
+-- 13. vw_seo_opportunities
+-- "Striking distance" keywords: position 5-20 with enough impressions
+-- These are keywords where pickleballeffect.com already ranks but could
+-- reach page 1 with content improvements
+CREATE OR REPLACE VIEW `{dataset}.vw_seo_opportunities` AS
+WITH recent AS (
+    SELECT
+        query,
+        page,
+        AVG(position) AS avg_position,
+        SUM(impressions) AS impressions_30d,
+        SUM(clicks) AS clicks_30d,
+        SAFE_DIVIDE(SUM(clicks), SUM(impressions)) AS ctr
+    FROM `{dataset}.search_console_performance`
+    WHERE query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+    GROUP BY query, page
+)
+SELECT
+    query,
+    page,
+    avg_position,
+    impressions_30d,
+    clicks_30d,
+    ctr,
+    -- Opportunity score: high impressions + close to page 1 = high score
+    ROUND(impressions_30d * (1.0 / avg_position) * 10, 2) AS opportunity_score
+FROM recent
+WHERE avg_position BETWEEN 5 AND 20
+    AND impressions_30d >= 100
+ORDER BY opportunity_score DESC
+;
+
+-- 14. vw_seo_content_gaps
+-- Pages with high impressions but low CTR — ranking well but not getting clicks
+-- Indicates bad title/meta description needing optimization
+CREATE OR REPLACE VIEW `{dataset}.vw_seo_content_gaps` AS
+WITH page_summary AS (
+    SELECT
+        page,
+        SUM(impressions) AS total_impressions,
+        SUM(clicks) AS total_clicks,
+        SAFE_DIVIDE(SUM(clicks), SUM(impressions)) AS avg_ctr,
+        AVG(position) AS avg_position
+    FROM `{dataset}.search_console_performance`
+    WHERE query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+    GROUP BY page
+    HAVING SUM(impressions) >= 200
+)
+SELECT
+    page,
+    total_impressions,
+    total_clicks,
+    avg_ctr,
+    avg_position,
+    CASE
+        WHEN avg_position <= 5 AND avg_ctr < 0.05
+            THEN 'optimize_title'
+        WHEN avg_position BETWEEN 5 AND 10 AND avg_ctr < 0.03
+            THEN 'optimize_meta'
+        WHEN avg_position > 10 AND avg_ctr < 0.02
+            THEN 'review_content'
+        ELSE 'monitor'
+    END AS suggested_action
+FROM page_summary
+WHERE avg_ctr < 0.05
+ORDER BY total_impressions DESC
+;
+
+-- 15. vw_seo_trends
+-- Week-over-week ranking changes to detect drops early
+CREATE OR REPLACE VIEW `{dataset}.vw_seo_trends` AS
+WITH weekly AS (
+    SELECT
+        query,
+        page,
+        DATE_TRUNC(query_date, WEEK(MONDAY)) AS week_start,
+        AVG(position) AS avg_position,
+        SUM(clicks) AS total_clicks,
+        SUM(impressions) AS total_impressions
+    FROM `{dataset}.search_console_performance`
+    WHERE query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 28 DAY)
+    GROUP BY query, page, week_start
+),
+with_prior AS (
+    SELECT
+        query,
+        page,
+        week_start,
+        avg_position AS current_week_position,
+        LAG(avg_position) OVER (
+            PARTITION BY query, page ORDER BY week_start
+        ) AS prior_week_position,
+        total_clicks AS current_week_clicks,
+        total_impressions AS current_week_impressions
+    FROM weekly
+)
+SELECT
+    query,
+    page,
+    week_start,
+    current_week_position,
+    prior_week_position,
+    ROUND(current_week_position - prior_week_position, 2) AS position_change,
+    current_week_clicks,
+    current_week_impressions,
+    CASE
+        WHEN prior_week_position IS NULL THEN 'new'
+        WHEN current_week_position - prior_week_position <= -1 THEN 'improving'
+        WHEN current_week_position - prior_week_position >= 1 THEN 'declining'
+        ELSE 'stable'
+    END AS trend
+FROM with_prior
+WHERE prior_week_position IS NOT NULL
+ORDER BY ABS(current_week_position - prior_week_position) DESC
+;
+
+-- ============================================================
+-- Phase 4D: Cross-Channel Summary
+-- ============================================================
+
+-- 16. vw_channel_summary
+-- Daily rollup by channel: spend, revenue, ROAS, CPA, orders
+-- Single source of truth for cross-channel comparison
+CREATE OR REPLACE VIEW `{dataset}.vw_channel_summary` AS
+WITH meta_daily AS (
+    SELECT
+        date_start AS report_date,
+        'meta' AS channel,
+        SUM(spend) AS spend,
+        SUM(impressions) AS impressions,
+        SUM(clicks) AS clicks,
+        SUM(purchases) AS conversions,
+        SUM(purchase_value) AS conversion_value
+    FROM `{dataset}.meta_daily_insights`
+    GROUP BY date_start
+),
+google_daily AS (
+    SELECT
+        date_start AS report_date,
+        'google_ads' AS channel,
+        SUM(spend) AS spend,
+        SUM(impressions) AS impressions,
+        SUM(clicks) AS clicks,
+        SUM(conversions) AS conversions,
+        SUM(conversion_value) AS conversion_value
+    FROM `{dataset}.google_ads_daily_insights`
+    GROUP BY date_start
+),
+ga4_organic AS (
+    SELECT
+        order_date AS report_date,
+        'organic' AS channel,
+        CAST(NULL AS FLOAT64) AS spend,
+        CAST(NULL AS INT64) AS impressions,
+        CAST(NULL AS INT64) AS clicks,
+        CAST(COUNT(DISTINCT order_id) AS FLOAT64) AS conversions,
+        SUM(shopify_revenue) AS conversion_value
+    FROM `{dataset}.vw_ga4_attribution`
+    WHERE LOWER(COALESCE(ga4_medium, '')) = 'organic'
+        AND shopify_revenue IS NOT NULL
+    GROUP BY order_date
+),
+ga4_direct AS (
+    SELECT
+        order_date AS report_date,
+        'direct' AS channel,
+        CAST(NULL AS FLOAT64) AS spend,
+        CAST(NULL AS INT64) AS impressions,
+        CAST(NULL AS INT64) AS clicks,
+        CAST(COUNT(DISTINCT order_id) AS FLOAT64) AS conversions,
+        SUM(shopify_revenue) AS conversion_value
+    FROM `{dataset}.vw_ga4_attribution`
+    WHERE (LOWER(COALESCE(ga4_source, '')) = '(direct)' OR ga4_source IS NULL)
+        AND shopify_revenue IS NOT NULL
+    GROUP BY order_date
+),
+ga4_referral AS (
+    SELECT
+        order_date AS report_date,
+        'referral' AS channel,
+        CAST(NULL AS FLOAT64) AS spend,
+        CAST(NULL AS INT64) AS impressions,
+        CAST(NULL AS INT64) AS clicks,
+        CAST(COUNT(DISTINCT order_id) AS FLOAT64) AS conversions,
+        SUM(shopify_revenue) AS conversion_value
+    FROM `{dataset}.vw_ga4_attribution`
+    WHERE LOWER(COALESCE(ga4_medium, '')) = 'referral'
+        AND shopify_revenue IS NOT NULL
+    GROUP BY order_date
+),
+all_channels AS (
+    SELECT * FROM meta_daily
+    UNION ALL SELECT * FROM google_daily
+    UNION ALL SELECT * FROM ga4_organic
+    UNION ALL SELECT * FROM ga4_direct
+    UNION ALL SELECT * FROM ga4_referral
+)
+SELECT
+    report_date,
+    channel,
+    spend,
+    impressions,
+    clicks,
+    conversions,
+    conversion_value AS revenue,
+    SAFE_DIVIDE(conversion_value, spend) AS roas,
+    SAFE_DIVIDE(spend, conversions) AS cpa,
+    CAST(conversions AS INT64) AS orders
+FROM all_channels
+;
+
+-- ============================================================
+-- Phase 5F: Content Performance Tracking
+-- ============================================================
+
+-- 17. vw_content_performance
+-- Joins content_posts with Search Console and GA4 data for feedback loop
+CREATE OR REPLACE VIEW `{dataset}.vw_content_performance` AS
+WITH sc_by_url AS (
+    SELECT
+        page,
+        AVG(position) AS current_position,
+        SUM(CASE WHEN query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) THEN impressions ELSE 0 END) AS impressions_7d,
+        SUM(CASE WHEN query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) THEN clicks ELSE 0 END) AS clicks_7d,
+        SAFE_DIVIDE(
+            SUM(CASE WHEN query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) THEN clicks ELSE 0 END),
+            SUM(CASE WHEN query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) THEN impressions ELSE 0 END)
+        ) AS ctr
+    FROM `{dataset}.search_console_performance`
+    WHERE query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+    GROUP BY page
+),
+ga4_by_page AS (
+    SELECT
+        CONCAT('https://', (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location')) AS page_url,
+        COUNT(DISTINCT CASE WHEN event_name = 'session_start' THEN user_pseudo_id END) AS ga4_sessions,
+        COUNT(DISTINCT CASE WHEN event_name = 'purchase' THEN user_pseudo_id END) AS ga4_conversions,
+        SUM(CASE WHEN event_name = 'purchase' THEN ecommerce.purchase_revenue ELSE 0 END) AS ga4_revenue
+    FROM `{ga4_dataset}.events_*`
+    WHERE _TABLE_SUFFIX >= FORMAT_DATE('%Y%m%d', DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY))
+        AND event_name IN ('session_start', 'purchase')
+    GROUP BY page_url
+)
+SELECT
+    cp.post_id,
+    cp.title,
+    cp.target_keyword,
+    cp.content_type,
+    cp.platform,
+    cp.status,
+    cp.url,
+    cp.word_count,
+    cp.publish_date,
+    DATE_DIFF(CURRENT_DATE(), cp.publish_date, DAY) AS days_since_publish,
+    sc.current_position,
+    sc.impressions_7d,
+    sc.clicks_7d,
+    sc.ctr,
+    g.ga4_sessions,
+    g.ga4_conversions,
+    g.ga4_revenue,
+    CASE
+        WHEN sc.clicks_7d >= 50 AND sc.current_position <= 5 THEN 'top_performer'
+        WHEN sc.clicks_7d >= 20 AND sc.current_position <= 10 THEN 'good'
+        WHEN sc.impressions_7d >= 100 AND sc.clicks_7d < 5 THEN 'underperforming'
+        WHEN DATE_DIFF(CURRENT_DATE(), cp.publish_date, DAY) < 14 THEN 'too_early'
+        ELSE 'monitor'
+    END AS performance_tier
+FROM `{dataset}.content_posts` cp
+LEFT JOIN sc_by_url sc ON cp.url = sc.page
+LEFT JOIN ga4_by_page g ON cp.url = g.page_url
+;
+
+-- ============================================================
+-- Phase 6A: Google Ads Copy Performance
+-- ============================================================
+
+-- 18. vw_google_ads_copy_performance
+-- Asset-level performance for Google RSA headlines and descriptions
+CREATE OR REPLACE VIEW `{dataset}.vw_google_ads_copy_performance` AS
+SELECT
+    ac.ad_id,
+    ac.campaign_id,
+    ac.campaign_name,
+    ac.ad_group_id,
+    ac.ad_group_name,
+    ac.ad_type,
+    ac.asset_type,
+    ac.asset_text,
+    ac.performance_label,
+    -- Aggregate ad-group level performance as proxy
+    SUM(gi.spend) AS ad_group_spend,
+    SUM(gi.impressions) AS ad_group_impressions,
+    SUM(gi.clicks) AS ad_group_clicks,
+    SUM(gi.conversions) AS ad_group_conversions,
+    SUM(gi.conversion_value) AS ad_group_conversion_value,
+    SAFE_DIVIDE(SUM(gi.conversion_value), SUM(gi.spend)) AS ad_group_roas,
+    SAFE_DIVIDE(SUM(gi.clicks), SUM(gi.impressions)) AS ad_group_ctr
+FROM `{dataset}.google_ads_ad_copy` ac
+LEFT JOIN `{dataset}.google_ads_daily_insights` gi
+    ON ac.ad_group_id = gi.ad_group_id
+    AND gi.date_start >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+GROUP BY ac.ad_id, ac.campaign_id, ac.campaign_name, ac.ad_group_id,
+         ac.ad_group_name, ac.ad_type, ac.asset_type, ac.asset_text,
+         ac.performance_label
+;
