@@ -3,9 +3,9 @@
 Usage:
     uv run python -m seo.run --opportunities --print     # Identify what to write
     uv run python -m seo.run --generate --type review --keyword "tungsten tape"
-    uv run python -m seo.run --generate --type landing_page --keyword "paddle tape" --product tungsten-tape
+    uv run python -m seo.run --generate --type landing_page --keyword "paddle tape" --product tungsten-tape --site shop
     uv run python -m seo.run --publish-drafts             # Push drafts to WordPress/Shopify
-    uv run python -m seo.run --sync-inventory             # Pull WordPress content inventory
+    uv run python -m seo.run --sync-inventory             # Pull WordPress + Shopify blog inventory
     uv run python -m seo.run --score --print              # Score published content
     uv run python -m seo.run --all                        # Full cycle
 """
@@ -29,7 +29,7 @@ def main():
     parser.add_argument("--publish-drafts", action="store_true",
                         help="Push pending drafts to WordPress/Shopify")
     parser.add_argument("--sync-inventory", action="store_true",
-                        help="Sync WordPress content inventory to BigQuery")
+                        help="Sync WordPress + Shopify blog content inventory to BigQuery")
     parser.add_argument("--score", action="store_true",
                         help="Score published content performance")
     parser.add_argument("--all", action="store_true",
@@ -41,6 +41,9 @@ def main():
                         help="Target keyword for content generation")
     parser.add_argument("--product", type=str, default=None,
                         help="Product focus for content generation")
+    parser.add_argument("--site", type=str, default="blog",
+                        choices=["blog", "shop"],
+                        help="Target site: blog (WordPress) or shop (Shopify) (default: blog)")
     parser.add_argument("--print", dest="to_stdout", action="store_true",
                         help="Print output instead of saving to file")
     args = parser.parse_args()
@@ -54,19 +57,20 @@ def main():
         if args.all or args.opportunities:
             log.info("--- Identifying content opportunities ---")
             from seo.opportunities import identify
-            identify(to_stdout=args.to_stdout)
+            identify(site=args.site, to_stdout=args.to_stdout)
 
         if args.all or args.generate:
             if not args.keyword and not args.all:
                 log.error("--keyword is required for --generate")
                 sys.exit(1)
             if args.keyword:
-                log.info(f"--- Generating {args.type} for '{args.keyword}' ---")
+                log.info(f"--- Generating {args.type} for '{args.keyword}' (site={args.site}) ---")
                 from seo.generate import generate_article
                 generate_article(
                     target_keyword=args.keyword,
                     content_type=args.type,
                     product=args.product,
+                    site=args.site,
                     to_stdout=args.to_stdout,
                 )
 
@@ -74,6 +78,10 @@ def main():
             log.info("--- Syncing WordPress inventory ---")
             from seo.wordpress.inventory import sync_inventory
             sync_inventory()
+
+            log.info("--- Syncing Shopify blog inventory ---")
+            from seo.shopify.inventory import sync_inventory as sync_shopify_inventory
+            sync_shopify_inventory()
 
         if args.publish_drafts:
             log.info("--- Publishing drafts ---")
@@ -92,13 +100,11 @@ def main():
 
 
 def _publish_pending_drafts():
-    """Find draft files in seo/drafts/ and push to WordPress."""
+    """Find draft files in seo/drafts/ and push to WordPress or Shopify."""
     from pathlib import Path
     import re
 
     import markdown
-
-    from seo.wordpress.publish import publish_draft
 
     drafts_dir = Path(__file__).resolve().parent / "drafts"
     if not drafts_dir.exists():
@@ -120,6 +126,7 @@ def _publish_pending_drafts():
         target_keyword = ""
         content_type = ""
         slug = ""
+        site = "blog"
 
         fm_match = re.match(r"^---\s*\n(.*?)\n---\s*\n", text, re.DOTALL)
         if fm_match:
@@ -134,6 +141,8 @@ def _publish_pending_drafts():
                     content_type = line.split(":", 1)[1].strip()
                 elif line.startswith("slug:"):
                     slug = line.split(":", 1)[1].strip().strip('"').strip("'")
+                elif line.startswith("site:"):
+                    site = line.split(":", 1)[1].strip()
 
         # Strip frontmatter and convert to HTML
         content_md = re.sub(r"^---\s*\n.*?\n---\s*\n", "", text, flags=re.DOTALL)
@@ -141,19 +150,39 @@ def _publish_pending_drafts():
 
         word_count = len(content_md.split())
 
-        if content_type == "landing_page":
-            log.info(f"Skipping landing page '{title}' — use --shopify for Shopify pages")
-            continue
-
-        publish_draft(
-            title=title,
-            content_html=content_html,
-            target_keyword=target_keyword,
-            content_type=content_type,
-            slug=slug,
-            meta_description=meta_description,
-            word_count=word_count,
-        )
+        # Route to the correct publisher based on site + content_type
+        if site == "shop" and content_type == "landing_page":
+            # Shopify Pages (existing)
+            from seo.shopify.pages import create_landing_page
+            create_landing_page(
+                title=title,
+                body_html=content_html,
+                target_keyword=target_keyword,
+                published=False,
+            )
+        elif site == "shop":
+            # Shopify Blog Articles (new)
+            from seo.shopify.articles import create_blog_article
+            create_blog_article(
+                title=title,
+                body_html=content_html,
+                tags=target_keyword,
+                target_keyword=target_keyword,
+                content_type=content_type,
+                published=False,
+            )
+        else:
+            # WordPress (default for site=blog)
+            from seo.wordpress.publish import publish_draft
+            publish_draft(
+                title=title,
+                content_html=content_html,
+                target_keyword=target_keyword,
+                content_type=content_type,
+                slug=slug,
+                meta_description=meta_description,
+                word_count=word_count,
+            )
 
         # Move processed draft
         processed_dir = drafts_dir / "published"
