@@ -8,6 +8,7 @@ from ingestion.utils.config import (
     GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET,
     GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN,
     GOOGLE_SEARCH_CONSOLE_SITE_URL,
+    GOOGLE_SEARCH_CONSOLE_SITE_URL_SHOP,
 )
 from ingestion.utils.logger import get_logger
 
@@ -35,30 +36,45 @@ def get_service():
 
 
 def get_site_url() -> str:
-    """Return the configured Search Console site URL."""
+    """Return the primary configured Search Console site URL."""
     return GOOGLE_SEARCH_CONSOLE_SITE_URL
 
 
+def get_site_urls() -> list[str]:
+    """Return all configured Search Console site URLs.
+
+    Reads GOOGLE_SEARCH_CONSOLE_SITE_URL (review site) and
+    GOOGLE_SEARCH_CONSOLE_SITE_URL_SHOP (shop site). Returns only
+    non-empty values.
+    """
+    urls = []
+    if GOOGLE_SEARCH_CONSOLE_SITE_URL:
+        urls.append(GOOGLE_SEARCH_CONSOLE_SITE_URL)
+    if GOOGLE_SEARCH_CONSOLE_SITE_URL_SHOP:
+        urls.append(GOOGLE_SEARCH_CONSOLE_SITE_URL_SHOP)
+    return urls
+
+
 def validate_access():
-    """Verify credentials by listing available sites."""
+    """Verify credentials by listing available sites and checking all configured URLs."""
     service = get_service()
     sites = service.sites().list().execute()
     site_entries = sites.get("siteEntry", [])
+    available = [s.get("siteUrl") for s in site_entries]
 
-    target = get_site_url()
-    found = False
-    for site in site_entries:
-        if site.get("siteUrl") == target:
-            log.info(
-                f"Search Console access verified: {target} "
-                f"(permission: {site.get('permissionLevel', 'unknown')})"
+    for target in get_site_urls():
+        found = False
+        for site in site_entries:
+            if site.get("siteUrl") == target:
+                log.info(
+                    f"Search Console access verified: {target} "
+                    f"(permission: {site.get('permissionLevel', 'unknown')})"
+                )
+                found = True
+                break
+
+        if not found:
+            raise RuntimeError(
+                f"Site {target} not found in Search Console. "
+                f"Available sites: {available}"
             )
-            found = True
-            break
-
-    if not found:
-        available = [s.get("siteUrl") for s in site_entries]
-        raise RuntimeError(
-            f"Site {target} not found in Search Console. "
-            f"Available sites: {available}"
-        )

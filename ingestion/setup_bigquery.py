@@ -28,7 +28,7 @@ TABLES = [
     ("google_ads_daily_insights", schemas.GOOGLE_ADS_DAILY_INSIGHTS, "date_start", ["campaign_id", "ad_group_id"]),
     ("google_ads_search_terms", schemas.GOOGLE_ADS_SEARCH_TERMS, "date_start", ["campaign_id", "ad_group_id"]),
     # Search Console
-    ("search_console_performance", schemas.SEARCH_CONSOLE_PERFORMANCE, "query_date", ["query", "page"]),
+    ("search_console_performance", schemas.SEARCH_CONSOLE_PERFORMANCE, "query_date", ["site", "query", "page"]),
     # SEO Content Tracking
     ("content_posts", schemas.CONTENT_POSTS, None, ["platform", "status"]),
     # Google Ads Copy

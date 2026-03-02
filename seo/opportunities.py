@@ -29,12 +29,27 @@ Output a ranked list of the top 5 content recommendations.\
 """
 
 
-def _query_opportunities() -> str:
+def _site_filter(site: str | None) -> str:
+    """Return a SQL WHERE clause fragment for site filtering."""
+    if site and site in ("blog", "shop"):
+        # Map CLI site names to Search Console domains
+        domain_map = {
+            "blog": "pickleballeffect.com",
+            "shop": "pickleballeffectshop.com",
+        }
+        domain = domain_map[site]
+        return f"AND site = '{domain}'"
+    return ""
+
+
+def _query_opportunities(site: str | None = None) -> str:
     """Get striking-distance keywords."""
+    site_clause = _site_filter(site)
     sql = f"""
-    SELECT query, page, avg_position, impressions_30d, clicks_30d,
+    SELECT site, query, page, avg_position, impressions_30d, clicks_30d,
            ctr, opportunity_score
     FROM `{_DS}.vw_seo_opportunities`
+    WHERE 1=1 {site_clause}
     ORDER BY opportunity_score DESC
     LIMIT 25
     """
@@ -44,11 +59,11 @@ def _query_opportunities() -> str:
         return "No SEO opportunity data available (Search Console not yet connected)."
     if not rows:
         return "No striking-distance keywords found."
-    header = "query | page | position | impressions | clicks | ctr | score"
+    header = "site | query | page | position | impressions | clicks | ctr | score"
     lines = [header, "-" * len(header)]
     for r in rows:
         lines.append(
-            f"{r.query} | {r.page} | "
+            f"{r.site} | {r.query} | {r.page} | "
             f"{r.avg_position or 0:.1f} | {r.impressions_30d or 0} | "
             f"{r.clicks_30d or 0} | {r.ctr or 0:.2%} | "
             f"{r.opportunity_score or 0:.1f}"
@@ -56,12 +71,14 @@ def _query_opportunities() -> str:
     return "\n".join(lines)
 
 
-def _query_content_gaps() -> str:
+def _query_content_gaps(site: str | None = None) -> str:
     """Get pages with high impressions but low CTR."""
+    site_clause = _site_filter(site)
     sql = f"""
-    SELECT page, total_impressions, total_clicks, avg_ctr,
+    SELECT site, page, total_impressions, total_clicks, avg_ctr,
            avg_position, suggested_action
     FROM `{_DS}.vw_seo_content_gaps`
+    WHERE 1=1 {site_clause}
     ORDER BY total_impressions DESC
     LIMIT 15
     """
@@ -71,11 +88,11 @@ def _query_content_gaps() -> str:
         return "No content gap data available."
     if not rows:
         return "No content gaps found."
-    header = "page | impressions | clicks | ctr | position | action"
+    header = "site | page | impressions | clicks | ctr | position | action"
     lines = [header, "-" * len(header)]
     for r in rows:
         lines.append(
-            f"{r.page} | {r.total_impressions or 0} | "
+            f"{r.site} | {r.page} | {r.total_impressions or 0} | "
             f"{r.total_clicks or 0} | {r.avg_ctr or 0:.2%} | "
             f"{r.avg_position or 0:.1f} | {r.suggested_action}"
         )
@@ -106,24 +123,22 @@ def _query_existing_content() -> str:
     return "\n".join(lines)
 
 
-def _query_wordpress_inventory() -> str:
-    """Attempt to get WordPress content inventory from content_posts table."""
-    # WordPress inventory is pulled by seo.wordpress.inventory and stored
-    # in content_posts. We just query it here.
-    return _query_existing_content()
-
-
-def identify(to_stdout: bool = False) -> str:
+def identify(site: str | None = None, to_stdout: bool = False) -> str:
     """Identify top content opportunities and output recommendations.
+
+    Args:
+        site: Filter to a specific site ("blog" or "shop"). None = all sites.
+        to_stdout: Print instead of saving to file.
 
     Returns:
         The content opportunities report text.
     """
-    log.info("Identifying content opportunities")
+    site_label = f" ({site})" if site else " (all sites)"
+    log.info(f"Identifying content opportunities{site_label}")
 
-    opp_data = _query_opportunities()
-    gap_data = _query_content_gaps()
-    inventory_data = _query_wordpress_inventory()
+    opp_data = _query_opportunities(site)
+    gap_data = _query_content_gaps(site)
+    inventory_data = _query_existing_content()
 
     data_context = (
         f"### Striking-Distance Keywords (Position 5-20)\n{opp_data}\n\n"
@@ -140,13 +155,13 @@ def identify(to_stdout: bool = False) -> str:
         f"4. Suggested title (under 60 chars)\n"
         f"5. Expected impact (high/medium/low) with reasoning\n"
         f"6. Any existing content overlap to watch for\n\n"
-        f"Today is {date.today()}."
+        f"Today is {date.today()}.{' Site: ' + site if site else ''}"
     )
 
     report = analyze(SYSTEM_PROMPT, data_context, question)
 
     full_report = (
-        f"# Content Opportunities Report\n"
+        f"# Content Opportunities Report{site_label}\n"
         f"## {date.today()}\n\n"
         f"{report}"
     )

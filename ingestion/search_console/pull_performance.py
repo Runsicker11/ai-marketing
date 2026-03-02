@@ -1,8 +1,9 @@
 """Pull search query + page performance data from Google Search Console."""
 
 from datetime import date, datetime, timezone
+from urllib.parse import urlparse
 
-from ingestion.search_console.auth import get_service, get_site_url
+from ingestion.search_console.auth import get_service
 from ingestion.utils.logger import get_logger
 
 log = get_logger(__name__)
@@ -11,18 +12,32 @@ log = get_logger(__name__)
 _MAX_ROWS = 25000
 
 
-def pull_performance(start_date: date, end_date: date) -> list[dict]:
-    """Fetch query+page performance data from Search Console.
+def _site_label(site_url: str) -> str:
+    """Derive a short site label from a Search Console site URL.
+
+    Examples:
+        'https://pickleballeffect.com/' -> 'pickleballeffect.com'
+        'sc-domain:pickleballeffectshop.com' -> 'pickleballeffectshop.com'
+    """
+    if site_url.startswith("sc-domain:"):
+        return site_url.split(":", 1)[1]
+    parsed = urlparse(site_url)
+    return parsed.netloc or site_url
+
+
+def pull_performance(start_date: date, end_date: date, site_url: str) -> list[dict]:
+    """Fetch query+page performance data from Search Console for one site.
 
     Args:
         start_date: Start date (inclusive).
         end_date: End date (inclusive).
+        site_url: The Search Console site URL to query.
 
     Returns:
         List of dicts matching SEARCH_CONSOLE_PERFORMANCE schema.
     """
     service = get_service()
-    site_url = get_site_url()
+    site = _site_label(site_url)
     now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
     all_rows = []
@@ -52,6 +67,7 @@ def pull_performance(start_date: date, end_date: date) -> list[dict]:
 
             all_rows.append({
                 "query_date": keys[0],  # YYYY-MM-DD
+                "site": site,
                 "query": keys[1],
                 "page": keys[2],
                 "country": keys[3],
@@ -63,12 +79,12 @@ def pull_performance(start_date: date, end_date: date) -> list[dict]:
                 "ingested_at": now_str,
             })
 
-        log.info(f"Fetched {len(rows)} rows (offset {start_row})")
+        log.info(f"[{site}] Fetched {len(rows)} rows (offset {start_row})")
 
         if len(rows) < _MAX_ROWS:
             break
         start_row += _MAX_ROWS
 
-    log.info(f"Total Search Console rows fetched: {len(all_rows)} "
+    log.info(f"[{site}] Total Search Console rows fetched: {len(all_rows)} "
              f"({start_date} to {end_date})")
     return all_rows

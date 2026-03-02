@@ -183,6 +183,7 @@ def generate_article(
     target_keyword: str,
     content_type: str = "review",
     product: str | None = None,
+    site: str = "blog",
     to_stdout: bool = False,
 ) -> dict:
     """Generate a full article draft with SEO optimization.
@@ -191,6 +192,7 @@ def generate_article(
         target_keyword: Primary keyword to target.
         content_type: Type of content (review, comparison, how_to, landing_page).
         product: Optional product focus.
+        site: Target site — "blog" (WordPress) or "shop" (Shopify).
         to_stdout: Print output instead of saving.
 
     Returns:
@@ -254,6 +256,7 @@ def generate_article(
         "slug": slug,
         "target_keyword": target_keyword,
         "content_type": content_type,
+        "site": site,
         "content": content,
         "word_count": len(content.split()),
         "validation_issues": issues,
@@ -321,6 +324,7 @@ def _save_draft(result: dict):
         f"target_keyword: \"{result['target_keyword']}\"\n"
         f"slug: \"{result['slug']}\"\n"
         f"content_type: {result['content_type']}\n"
+        f"site: {result.get('site', 'blog')}\n"
         f"status: draft\n"
         f"word_count: {result['word_count']}\n"
         f"generated_at: {datetime.now(timezone.utc).isoformat()}\n"

@@ -612,11 +612,12 @@ ORDER BY total_spend DESC
 
 -- 13. vw_seo_opportunities
 -- "Striking distance" keywords: position 5-20 with enough impressions
--- These are keywords where pickleballeffect.com already ranks but could
--- reach page 1 with content improvements
+-- These are keywords where we already rank but could
+-- reach page 1 with content improvements (supports multiple sites)
 CREATE OR REPLACE VIEW `{dataset}.vw_seo_opportunities` AS
 WITH recent AS (
     SELECT
+        site,
         query,
         page,
         AVG(position) AS avg_position,
@@ -625,9 +626,10 @@ WITH recent AS (
         SAFE_DIVIDE(SUM(clicks), SUM(impressions)) AS ctr
     FROM `{dataset}.search_console_performance`
     WHERE query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
-    GROUP BY query, page
+    GROUP BY site, query, page
 )
 SELECT
+    site,
     query,
     page,
     avg_position,
@@ -648,6 +650,7 @@ ORDER BY opportunity_score DESC
 CREATE OR REPLACE VIEW `{dataset}.vw_seo_content_gaps` AS
 WITH page_summary AS (
     SELECT
+        site,
         page,
         SUM(impressions) AS total_impressions,
         SUM(clicks) AS total_clicks,
@@ -655,10 +658,11 @@ WITH page_summary AS (
         AVG(position) AS avg_position
     FROM `{dataset}.search_console_performance`
     WHERE query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
-    GROUP BY page
+    GROUP BY site, page
     HAVING SUM(impressions) >= 200
 )
 SELECT
+    site,
     page,
     total_impressions,
     total_clicks,
@@ -683,6 +687,7 @@ ORDER BY total_impressions DESC
 CREATE OR REPLACE VIEW `{dataset}.vw_seo_trends` AS
 WITH weekly AS (
     SELECT
+        site,
         query,
         page,
         DATE_TRUNC(query_date, WEEK(MONDAY)) AS week_start,
@@ -691,22 +696,24 @@ WITH weekly AS (
         SUM(impressions) AS total_impressions
     FROM `{dataset}.search_console_performance`
     WHERE query_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 28 DAY)
-    GROUP BY query, page, week_start
+    GROUP BY site, query, page, week_start
 ),
 with_prior AS (
     SELECT
+        site,
         query,
         page,
         week_start,
         avg_position AS current_week_position,
         LAG(avg_position) OVER (
-            PARTITION BY query, page ORDER BY week_start
+            PARTITION BY site, query, page ORDER BY week_start
         ) AS prior_week_position,
         total_clicks AS current_week_clicks,
         total_impressions AS current_week_impressions
     FROM weekly
 )
 SELECT
+    site,
     query,
     page,
     week_start,
