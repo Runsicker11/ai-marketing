@@ -273,6 +273,7 @@ GOOGLE_ADS_SEARCH_TERMS = [
 
 SEARCH_CONSOLE_PERFORMANCE = [
     SchemaField("query_date", "DATE", mode="REQUIRED"),
+    SchemaField("site", "STRING"),
     SchemaField("query", "STRING"),
     SchemaField("page", "STRING"),
     SchemaField("country", "STRING"),
