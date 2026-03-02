@@ -1,6 +1,8 @@
 # AI Marketing Automation - Master Plan
 # Pickleball Effect (pickleballeffectshop.com)
 
+> **For complete system documentation, see [`docs/PRD.md`](docs/PRD.md).**
+
 ## Current State
 - **Business:** Pickleball equipment reviews (pickleballeffect.com) + accessory shop (pickleballeffectshop.com, Shopify)
 - **Agency cost:** $3,000/month (email, website, ads management)
@@ -137,57 +139,56 @@ Braydon films all ad videos. Phase 3 only analyzes the **text wrapper** (headlin
 
 ---
 
-## Phase 4: Automated Optimization (Weeks 7-10)
+## Phase 4: Search Console + SEO Intelligence -- COMPLETE (Feb 2026)
 
-### 4.1 Budget Recommendations
-- [ ] Claude analyzes cross-platform + Shopify data
-- [ ] Recommends budget shifts based on TRUE ROAS (not platform estimates)
-- [ ] Rules: max 20% shift per day, minimum spend per channel, ROAS floor
-- [ ] You approve/reject via email
-
-### 4.2 Creative Rotation
-- [ ] Detect creative fatigue (CTR declining over 7+ days)
-- [ ] Auto-suggest replacement ads from content library
-- [ ] You approve, then system pushes to platform via API
-
-### 4.3 Google Ads Automation
-- [ ] Negative keyword management (analyze search terms, suggest negatives)
-- [ ] Bid adjustment recommendations
-- [ ] RSA headline/description optimization
-- [ ] Shopping campaign optimization (if applicable)
-
-### 4.4 Meta Ads Automation
-- [ ] Audience performance analysis
-- [ ] Ad set budget optimization (CBO vs ABO recommendations)
-- [ ] Placement performance analysis (Feed vs Stories vs Reels)
-- [ ] Lookalike audience suggestions based on Shopify customer data
-
-### 4.5 Product-Level Intelligence
-- [ ] Which products are most profitable to advertise? (revenue - COGS - ad cost)
-- [ ] Auto-prioritize ad spend toward highest-margin products
-- [ ] Seasonal trends: do certain products sell better at certain times?
-
-### Phase 4 Exit Criteria
-> AI handles day-to-day optimization recommendations.
-> You spend 30 min/day reviewing and approving vs. relying on agency.
-> Performance is equal to or better than agency-managed period.
+- [x] Search Console API integration (OAuth2, query+page performance)
+- [x] `search_console_performance` table
+- [x] 3 SEO views: `vw_seo_opportunities`, `vw_seo_content_gaps`, `vw_seo_trends`
+- [x] `vw_channel_summary` view (daily rollup by channel)
+- [x] Google Ads analysis integrated into weekly strategy reports
+- [x] 3 new alerts: search term waste, keyword quality score, SEO ranking drop
 
 ---
 
-## Phase 5: Autonomous Operation (Weeks 11+)
+## Phase 5: SEO Content Engine -- COMPLETE (Feb 2026)
 
-### 5.1 Graduated Autonomy
-- [ ] High-confidence actions auto-execute (pause ads with ROAS < 0.5)
-- [ ] Medium-confidence actions go to you for approval
-- [ ] All actions logged and reversible
+- [x] SEO content config (`config/seo_content.yaml`) — 4 content types, SEO rules, review gate
+- [x] Opportunity identification from Search Console + GA4 data
+- [x] AI article/landing page generation with templates and brand voice
+- [x] WordPress REST API integration (Application Passwords)
+- [x] Shopify Pages integration for landing pages
+- [x] Content performance scoring via `vw_content_performance`
+- [x] `content_posts` table for tracking published content
+- [x] CLI orchestration: `uv run python -m seo.run --all`
+
+---
+
+## Phase 6: Google Ads Copy + Optimization Engine -- COMPLETE (Feb 2026)
+
+- [x] Google Ads RSA copy generation (headlines 30 char, descriptions 90 char)
+- [x] `google_ads_ad_copy` table + `vw_google_ads_copy_performance` view
+- [x] Search term hygiene: AI reviews waste, recommends negative keywords
+- [x] Budget intelligence: cross-channel reallocation recommendations
+- [x] Action proposal system with human approval gates (`optimization_actions` table)
+- [x] Autonomy levels: auto-execute ROAS < 0.5, approval required for budget/campaign/keyword changes
+- [x] CLI orchestration: `uv run python -m optimization.run --all`
+
+---
+
+## Future: Agency Transition + Autonomous Operation
+
+### Graduated Autonomy
+- [ ] High-confidence actions auto-execute (pause ads with ROAS < 0.5) — framework built, needs API execution
+- [ ] Medium-confidence actions go to you for approval — framework built
+- [ ] All actions logged and reversible — logging in place
 - [ ] Dashboard showing what the AI did and why
 
-### 5.2 Full Agency Transition
+### Full Agency Transition
 - [ ] Negotiate agency down to $1,000/month (website + email only)
 - [ ] Run parallel: AI-managed + agency-managed for 2-4 weeks
 - [ ] Cut over fully when confident
 
-### 5.3 Continuous Improvement
+### Continuous Improvement
 - [ ] Monthly strategy review with Claude (full data analysis + market trends)
 - [ ] Quarterly content library refresh
 - [ ] Expand to new platforms if relevant (TikTok, YouTube Ads)
