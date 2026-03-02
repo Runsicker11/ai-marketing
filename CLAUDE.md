@@ -61,19 +61,25 @@ uv run python -m content.run --score --print
 # Content machine: full cycle (audit -> generate -> score)
 uv run python -m content.run --all
 
-# SEO content engine: identify what to write
+# SEO content engine: identify what to write (all sites)
 uv run python -m seo.run --opportunities --print
 
-# SEO content engine: generate article draft
+# SEO content engine: identify for a specific site
+uv run python -m seo.run --opportunities --site shop --print
+
+# SEO content engine: generate article draft (default: blog/WordPress)
 uv run python -m seo.run --generate --type review --keyword "tungsten tape" --print
 
-# SEO content engine: generate landing page for product
-uv run python -m seo.run --generate --type landing_page --keyword "paddle tape" --product tungsten-tape
+# SEO content engine: generate for Shopify shop blog
+uv run python -m seo.run --generate --type how_to --keyword "paddle tape" --site shop --print
 
-# SEO content engine: sync WordPress content inventory
+# SEO content engine: generate landing page for product (Shopify)
+uv run python -m seo.run --generate --type landing_page --keyword "paddle tape" --product tungsten-tape --site shop
+
+# SEO content engine: sync WordPress + Shopify blog content inventory
 uv run python -m seo.run --sync-inventory
 
-# SEO content engine: push drafts to WordPress
+# SEO content engine: push drafts to WordPress/Shopify (auto-routes by site in frontmatter)
 uv run python -m seo.run --publish-drafts
 
 # SEO content engine: score published content performance
@@ -101,14 +107,14 @@ uv run python -m optimization.run --all --print
 ## Architecture
 
 ### Data Flow
-Shopify API + Meta Ads API + Google Ads API + Search Console API → BigQuery tables (20) → Unified views (18) → Claude analysis → Content library + SEO content + Optimization proposals
+Shopify API + Meta Ads API + Google Ads API + Search Console API (multi-site) → BigQuery tables (20) → Unified views (18) → Claude analysis → Content library + SEO content + Optimization proposals
 
 ### BigQuery Tables (ingested)
 - `shopify_orders`, `shopify_order_line_items`, `shopify_products`, `shopify_product_variants`, `shopify_customers`
 - `meta_campaigns`, `meta_adsets`, `meta_ads`, `meta_daily_insights`, `meta_creatives`
 - `google_ads_campaigns`, `google_ads_ad_groups`, `google_ads_keywords`, `google_ads_daily_insights`, `google_ads_search_terms`
 - `content_library`
-- `search_console_performance` (Phase 4)
+- `search_console_performance` (Phase 4, multi-site with `site` column)
 - `content_posts` (Phase 5)
 - `google_ads_ad_copy` (Phase 6)
 - `optimization_actions` (Phase 6)
@@ -118,7 +124,7 @@ Shopify API + Meta Ads API + Google Ads API + Search Console API → BigQuery ta
 - Phase 2 (GA4): `vw_ga4_attribution`, `vw_enhanced_roas` (cross-platform), `vw_ga4_funnel`, `vw_ga4_product_insights`
 - Phase 3 (Content): `vw_creative_performance`, `vw_component_scores`
 - Google Ads: `vw_google_ads_keywords`, `vw_search_terms_waste`
-- Phase 4 (SEO): `vw_seo_opportunities`, `vw_seo_content_gaps`, `vw_seo_trends`, `vw_channel_summary`
+- Phase 4 (SEO): `vw_seo_opportunities` (site-aware), `vw_seo_content_gaps` (site-aware), `vw_seo_trends` (site-aware), `vw_channel_summary`
 - Phase 5 (Content Tracking): `vw_content_performance`
 - Phase 6 (Google Ads Copy): `vw_google_ads_copy_performance`
 
@@ -136,13 +142,15 @@ Shopify API + Meta Ads API + Google Ads API + Search Console API → BigQuery ta
 - `content/generator/output/` — generated copy pending human review
 
 ### SEO Content Engine (Phase 5)
-- `seo/opportunities.py` — identifies content opportunities from Search Console + GA4 data
-- `seo/generate.py` — AI-powered article/landing page generation with SEO rules
+- `seo/opportunities.py` — identifies content opportunities from Search Console + GA4 data (filterable by `--site`)
+- `seo/generate.py` — AI-powered article/landing page generation with SEO rules (writes `site` to frontmatter)
 - `seo/scorer.py` — scores published content against Search Console + GA4 performance
 - `seo/wordpress/auth.py` — WordPress REST API authentication (Application Passwords)
 - `seo/wordpress/publish.py` — creates draft posts in WordPress for review
 - `seo/wordpress/inventory.py` — pulls existing WordPress content inventory
 - `seo/shopify/pages.py` — creates landing pages on Shopify shop
+- `seo/shopify/articles.py` — creates blog articles on Shopify shop
+- `seo/shopify/inventory.py` — pulls existing Shopify blog article inventory
 - `seo/templates/` — markdown templates for each content type (review, comparison, how_to, landing_page)
 - `seo/drafts/` — generated drafts pending human review
 - `config/seo_content.yaml` — content generation rules (word counts, required sections, SEO rules)
@@ -153,10 +161,10 @@ Shopify API + Meta Ads API + Google Ads API + Search Console API → BigQuery ta
 - `optimization/actions.py` — action proposal system with human approval gates
 - `optimization/proposals/` — JSON files for pending optimization proposals
 
-### Search Console Integration (Phase 4)
-- `ingestion/search_console/auth.py` — OAuth2 for Search Console API
-- `ingestion/search_console/pull_performance.py` — pull query+page performance
-- `ingestion/search_console/run.py` — orchestrator (same pattern as other ingestion modules)
+### Search Console Integration (Phase 4, multi-site)
+- `ingestion/search_console/auth.py` — OAuth2 for Search Console API, `get_site_urls()` returns all configured sites
+- `ingestion/search_console/pull_performance.py` — pull query+page performance per site (includes `site` column)
+- `ingestion/search_console/run.py` — orchestrator, loops over all configured site URLs
 
 ## Key Conventions
 
@@ -182,6 +190,9 @@ Shopify API + Meta Ads API + Google Ads API + Search Console API → BigQuery ta
 - **Google Ads** conversions are FLOAT64 (data-driven attribution gives fractional values)
 - **Google Ads RSA** headlines max 30 chars, descriptions max 90 chars (different from Meta's 40/125)
 - **Search Console** data has 2-3 day lag — default to 7 days back, ending 3 days ago
+- **Search Console** now supports multiple sites — `search_console_performance` has a `site` column
+- **Shopify blog** articles use `platform: "shopify_blog"` in `content_posts` (vs `"shopify"` for pages)
+- **SEO `--site` flag**: `blog` = WordPress (pickleballeffect.com), `shop` = Shopify (pickleballeffectshop.com)
 - **WordPress** requires Application Passwords for REST API auth
 
 ## .env Variables
@@ -193,8 +204,9 @@ SHOPIFY_SHOP_DOMAIN, SHOPIFY_CLIENT_ID, SHOPIFY_CLIENT_SECRET
 META_ADS_ACCOUNT_ID, META_APP_ID, META_APP_SECRET, META_ACCESS_TOKEN
 GOOGLE_ADS_CUSTOMER_ID, GOOGLE_ADS_DEVELOPER_TOKEN, GOOGLE_ADS_CLIENT_ID, GOOGLE_ADS_CLIENT_SECRET, GOOGLE_ADS_REFRESH_TOKEN, GOOGLE_ADS_LOGIN_CUSTOMER_ID
 
-# Phase 4 (Search Console)
-GOOGLE_SEARCH_CONSOLE_SITE_URL
+# Phase 4 (Search Console — multi-site)
+GOOGLE_SEARCH_CONSOLE_SITE_URL           # Review site (pickleballeffect.com)
+GOOGLE_SEARCH_CONSOLE_SITE_URL_SHOP      # Shop site (pickleballeffectshop.com)
 GOOGLE_SEARCH_CONSOLE_CLIENT_ID
 GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET
 GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN
