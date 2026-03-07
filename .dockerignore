@@ -1,0 +1,14 @@
+.env
+.env.*
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+reports/
+seo/drafts/
+content/generator/output/
+optimization/proposals/
+.ruff_cache
+.claude/
+nul
