@@ -377,7 +377,7 @@ def review_and_propose(to_stdout: bool = False) -> int:
             continue
 
         try:
-            create_proposal(
+            proposal = create_proposal(
                 action_type=action_type,
                 platform="google_ads",
                 entity_id=str(p["campaign_id"]),
@@ -388,7 +388,8 @@ def review_and_propose(to_stdout: bool = False) -> int:
                 expected_impact=p["expected_impact"],
                 risk_level=p.get("risk_level", risk),
             )
-            created += 1
+            if proposal is not None:
+                created += 1
         except Exception as e:
             log.warning(f"Failed to create proposal for '{p['search_term']}': {e}")
 

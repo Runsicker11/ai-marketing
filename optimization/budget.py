@@ -402,6 +402,14 @@ def _apply_guardrails(proposals: list[dict], budget_rules: dict) -> list[dict]:
                 )
                 p["proposed_daily_budget"] = round(clamped, 2)
 
+        # Skip no-op proposals (proposed == current after clamping)
+        if abs(p["proposed_daily_budget"] - current) < 0.01:
+            log.warning(
+                f"Budget proposal skipped: {p['target_campaign_name']} "
+                f"proposed budget equals current (${current:.2f}) — no change."
+            )
+            continue
+
         validated.append(p)
 
     return validated
@@ -469,7 +477,7 @@ def recommend_and_propose(to_stdout: bool = False) -> int:
     created = 0
     for p in proposals:
         try:
-            create_proposal(
+            proposal = create_proposal(
                 action_type="shift_budget",
                 platform="google_ads",
                 entity_id=str(p["target_campaign_id"]),
@@ -486,7 +494,8 @@ def recommend_and_propose(to_stdout: bool = False) -> int:
                 ),
                 risk_level=p.get("risk_level", "medium"),
             )
-            created += 1
+            if proposal is not None:
+                created += 1
         except Exception as e:
             log.warning(f"Failed to create budget proposal for "
                         f"'{p['target_campaign_name']}': {e}")

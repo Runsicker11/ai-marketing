@@ -75,6 +75,21 @@ def create_proposal(
         raise ValueError(f"Unknown action type: {action_type}. "
                          f"Valid types: {list(ACTION_TYPES.keys())}")
 
+    # Skip if an identical pending proposal already exists
+    existing = list(run_query(f"""
+        SELECT action_id FROM `{_DS}.optimization_actions`
+        WHERE action_type = '{action_type}'
+          AND entity_id = '{entity_id}'
+          AND status = 'proposed'
+        LIMIT 1
+    """))
+    if existing:
+        log.info(
+            f"Skipping duplicate proposal: {action_type} on {entity_name} "
+            f"already pending ({existing[0]['action_id']})"
+        )
+        return None
+
     now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     action_id = f"act_{uuid.uuid4().hex[:12]}"
 

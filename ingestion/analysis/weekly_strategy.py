@@ -356,4 +356,18 @@ def generate(week_end: date | None = None, to_stdout: bool = False) -> str:
         path.write_text(full_report, encoding="utf-8")
         log.info(f"Weekly report saved to {path}")
 
+    # Send condensed summary to Slack (first 2800 chars covers Week in Review
+    # and Channel Strategy; full report is in Cloud Logging)
+    try:
+        from ingestion.utils.slack import send_slack
+        preview = full_report[:2800]
+        if len(full_report) > 2800:
+            preview += "\n\n_...truncated. Full report in Cloud Logging._"
+        send_slack(
+            f":bar_chart: *Weekly Strategy Report — {week_start} to {week_end}*\n\n"
+            f"{preview}"
+        )
+    except Exception:
+        log.warning("Failed to send weekly report to Slack", exc_info=True)
+
     return full_report
