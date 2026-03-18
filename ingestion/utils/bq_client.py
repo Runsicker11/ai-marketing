@@ -56,17 +56,27 @@ def full_replace(table_name: str, rows: list[dict], schema: list[bigquery.Schema
     return len(rows)
 
 
-def delete_date_range(table_name: str, date_col: str, start: date, end: date):
-    """Delete rows in a date range (inclusive) for idempotent reload."""
+def delete_date_range(table_name: str, date_col: str, start: date, end: date,
+                      extra_conditions: dict[str, str] | None = None):
+    """Delete rows in a date range (inclusive) for idempotent reload.
+
+    Args:
+        extra_conditions: Optional dict of {column: value} for additional
+            WHERE clauses (e.g. {"site": "https://example.com/"}).
+    """
     client = get_client()
     ref = table_ref(table_name)
     query = f"DELETE FROM `{ref}` WHERE {date_col} BETWEEN @start AND @end"
-    job_config = bigquery.QueryJobConfig(
-        query_parameters=[
-            bigquery.ScalarQueryParameter("start", "DATE", start.isoformat()),
-            bigquery.ScalarQueryParameter("end", "DATE", end.isoformat()),
-        ]
-    )
+    params = [
+        bigquery.ScalarQueryParameter("start", "DATE", start.isoformat()),
+        bigquery.ScalarQueryParameter("end", "DATE", end.isoformat()),
+    ]
+    if extra_conditions:
+        for i, (col, val) in enumerate(extra_conditions.items()):
+            param_name = f"cond_{i}"
+            query += f" AND {col} = @{param_name}"
+            params.append(bigquery.ScalarQueryParameter(param_name, "STRING", val))
+    job_config = bigquery.QueryJobConfig(query_parameters=params)
     job = client.query(query, job_config=job_config)
     result = job.result()
     log.info(f"Deleted rows from {table_name} where {date_col} between {start} and {end} ({result.num_dml_affected_rows} rows)")

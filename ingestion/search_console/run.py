@@ -9,7 +9,7 @@ import argparse
 from datetime import date, timedelta
 
 from ingestion.search_console.auth import validate_access, get_site_urls
-from ingestion.search_console.pull_performance import pull_performance
+from ingestion.search_console.pull_performance import pull_performance, _site_label
 from ingestion.utils.bq_client import load_rows, delete_date_range
 from ingestion.utils.logger import get_logger
 from ingestion import schemas
@@ -44,8 +44,10 @@ def run(days_back: int = 7):
         rows = pull_performance(start_date, end_date, site_url)
 
         if rows:
+            site_label = _site_label(site_url)
             delete_date_range("search_console_performance", "query_date",
-                              start_date, end_date)
+                              start_date, end_date,
+                              extra_conditions={"site": site_label})
             load_rows("search_console_performance", rows,
                        schemas.SEARCH_CONSOLE_PERFORMANCE)
 

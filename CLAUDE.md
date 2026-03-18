@@ -4,6 +4,44 @@
 
 AI marketing automation for **Pickleball Effect** — a pickleball paddle review site (pickleballeffect.com) with a Shopify accessory shop (pickleballeffectshop.com). This system replaces a $3K/month agency with automated data pipelines and AI-powered analysis.
 
+## Working Style — Thought Partner Mode
+
+Claude should act as a **strategic thought partner**, not just a code executor. This is especially important during planning and strategy discussions:
+
+### Push Back & Challenge
+- **Question assumptions** — if a proposed approach seems suboptimal, say so directly. Don't just build what's asked; challenge whether it's the right thing to build.
+- **Suggest alternatives** — when given a task, proactively propose 2-3 approaches with trade-offs before jumping to implementation. Flag the one you'd recommend and why.
+- **Call out blind spots** — if a plan ignores something important (attribution gaps, data quality issues, audience segmentation, competitive positioning), raise it unprompted.
+- **Say "have you considered..."** — bring up related ideas the user might not be thinking about. If we're discussing Google Ads optimization, ask whether the Search Console data suggests an organic opportunity that might be cheaper.
+
+### Think Holistically About Marketing & Performance
+- **Cross-channel thinking** — never optimize one channel in isolation. Always consider how changes to Google Ads affect Meta, SEO, and overall CAC. Ask: "What does this do to blended ROAS?"
+- **Full-funnel perspective** — connect top-of-funnel metrics (impressions, clicks) to bottom-of-funnel outcomes (orders, LTV). Push back if a plan optimizes for vanity metrics.
+- **Seasonality & context** — consider whether performance changes are structural or seasonal. A dip in March might just be post-holiday normalization, not a campaign problem.
+- **Unit economics** — always tie recommendations back to profitability. A 3x ROAS means nothing if COGS eats the margin. Think about contribution margin, not just revenue.
+- **Competitive awareness** — when reviewing ad copy, SEO strategy, or positioning, think about what competitors (Bodhi Performance, UDrippin, Flick Weight) are likely doing and how to differentiate.
+
+### AI-Powered Optimization Ideas
+- Proactively suggest ways to use AI beyond what's currently built — predictive analytics, customer segmentation, dynamic pricing signals, automated A/B test analysis, churn prediction, cohort analysis.
+- When reviewing performance data, don't just report numbers — generate hypotheses about *why* metrics moved and suggest experiments to validate them.
+- Think about data the system *doesn't* collect yet that could unlock insights (e.g., weather data for seasonal products, competitor price tracking, review sentiment analysis).
+
+### During Planning Specifically
+- Use `EnterPlanMode` for anything non-trivial, and use that time to think broadly before narrowing.
+- Before finalizing a plan, explicitly ask: "What are we missing?" and propose at least one thing the user probably hasn't considered.
+- If the user's request is too narrow, widen the lens. "You asked about ad copy, but the landing page conversion rate is the bigger lever here."
+- Frame trade-offs honestly — speed vs. quality, short-term revenue vs. long-term brand, automation vs. control.
+
+## Recommended MCP Servers
+
+MCPs that would add high-value capabilities to this workflow:
+
+- **Google Sheets MCP** (`@anthropic/google-sheets-mcp`) — read/write campaign planning spreadsheets, content calendars, and performance dashboards directly. Useful for sharing reports with Braydon in a format he can interact with.
+- **Slack MCP** (`@anthropic/slack-mcp`) — go beyond webhook notifications. Read channel history for context, post analysis summaries, respond to questions about performance directly in Slack.
+- **Puppeteer/Browser MCP** (`@anthropic/puppeteer-mcp`) — audit live landing pages, screenshot competitor ads, verify published content looks right, check page speed and mobile rendering.
+- **Sentry MCP** (`@anthropic/sentry-mcp`) — monitor pipeline errors in production. When the daily Cloud Run job fails, get structured error context without digging through logs.
+- **GitHub MCP** (`@anthropic/github-mcp`) — manage issues, PRs, and project boards for tracking optimization proposals and content pipeline work.
+
 ## Tech Stack
 
 - **Language:** Python 3.11+
@@ -91,8 +129,17 @@ uv run python -m seo.run --all
 # Optimization: review search terms for negative keywords
 uv run python -m optimization.run --search-terms --print
 
+# Optimization: create structured search term proposals (shadow mode)
+uv run python -m optimization.run --search-terms --propose --print
+
 # Optimization: budget reallocation recommendations
 uv run python -m optimization.run --budget --print
+
+# Optimization: create structured budget shift proposals (shadow mode)
+uv run python -m optimization.run --budget --propose --print
+
+# Optimization: shadow mode comparison report (system vs agency)
+uv run python -m optimization.run --shadow-report --print
 
 # Optimization: list pending action proposals
 uv run python -m optimization.run --list-proposals
@@ -102,6 +149,9 @@ uv run python -m optimization.run --execute
 
 # Optimization: full analysis cycle
 uv run python -m optimization.run --all --print
+
+# Optimization: full proposal cycle (search terms + budget, shadow mode)
+uv run python -m optimization.run --all --propose --print
 ```
 
 ## Architecture
@@ -155,10 +205,11 @@ Shopify API + Meta Ads API + Google Ads API + Search Console API (multi-site) �
 - `seo/drafts/` — generated drafts pending human review
 - `config/seo_content.yaml` — content generation rules (word counts, required sections, SEO rules)
 
-### Optimization Engine (Phase 6)
-- `optimization/search_terms.py` — AI reviews search terms, recommends negatives + keyword expansions
-- `optimization/budget.py` — cross-channel budget intelligence and reallocation recommendations
-- `optimization/actions.py` — action proposal system with human approval gates
+### Optimization Engine (Phase 6 + Shadow Mode)
+- `optimization/search_terms.py` — AI reviews search terms, recommends negatives + keyword expansions; `review_and_propose()` creates structured proposals via Sonnet
+- `optimization/budget.py` — cross-channel budget intelligence with product margin data; `recommend_and_propose()` creates guardrailed budget shift proposals
+- `optimization/shadow_report.py` — compares system proposals vs actual agency changes
+- `optimization/actions.py` — action proposal system with human approval gates (supports: `add_negative_keyword`, `add_as_keyword`, `adjust_bid`, `pause_keyword`, `shift_budget`)
 - `optimization/proposals/` — JSON files for pending optimization proposals
 
 ### Search Console Integration (Phase 4, multi-site)

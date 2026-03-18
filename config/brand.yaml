@@ -14,26 +14,108 @@ revenue_model:
   - "YouTube channel (60,000+ monthly viewers)"
   # TODO: Confirm - any sponsorship revenue? Course/membership revenue?
 
-# Brand Voice
+# Brand Voice (extracted from 115 published articles, March 2026)
 voice:
   tone: "direct, authentic, no-BS, confident but approachable"
-  style: "conversational, data-backed, real-player perspective"
+  style: "conversational, data-backed, first-person authority with measured emotional temperature"
   tagline: "Real testing. Real data. Real Braydon. Honest takes. No AI. No fluff."
   principles:
     - "Independent - reviews are earned, not bought"
     - "Court-tested - every paddle reviewed has been played on court"
-    - "Specs verified in-house - not just repeating manufacturer claims"
+    - "Specs verified in-house - 200+ paddle database with measured twistweight, swingweight, spin RPMs"
     - "Community-first - serving players, not brands"
+    - "Honest tradeoffs - every Buy If gets an equal Pass If"
+    - "Price realism - always position price relative to competition and value"
+    - "Willing to publicly disagree with brands"
+  person:
+    primary: "first-person (I, my) for opinions and testing experience"
+    secondary: "second-person (you, your) for reader guidance"
+    never: "'we' for opinions — only 'our' when referring to the publication (our Hot List)"
+  sentence_style:
+    - "Mix of short declarative (emphasis) and medium complex (15-25 words)"
+    - "Em-dashes for mid-sentence context"
+    - "Short scannable paragraphs (2-5 sentences)"
+    - "Single-sentence paragraphs for emphasis"
+    - "Questions used to frame sections, never rhetorical"
+  technical_depth:
+    assumes: "intermediate knowledge — basic pickleball terms, paddle categories, multi-paddle experience"
+    explains: "construction methods, thermoforming, foam cores, twistweight, swingweight"
+    balance: "60% real-world performance feel, 40% technical specs — feel first, data to validate"
+    pattern: "Introduce → Define → Contextualize → Apply"
+  scoring:
+    metrics: ["Power", "Pop", "Control", "Sweet Spot", "Spin", "Maneuverability"]
+    scale: "X/10"
+    distribution: "1-2 standout (8-10), 3-4 middle (6-7.5), 1-2 tradeoff (5-6)"
+    honesty: "No perfect paddles — control paddles get low power, power paddles get low control"
+  signature_phrases:
+    verdicts:
+      - "Bottom line:"
+      - "In short:"
+      - "That alone says something."
+      - "This is a great pick for..."
+      - "It's a compelling option if..."
+      - "earned its spot"
+      - "a strong fit for..."
+    performance:
+      - "easy access to [power/offense/spin]"
+      - "absorbs pace"
+      - "without sacrificing [X]"
+      - "sits in the mid-[category] tier"
+      - "delivered clean, responsive feedback"
+    feel_descriptors:
+      - "crisp and lively"
+      - "soft and muted"
+      - "stiff and hollow"
+      - "plush and pleasant"
+      - "pockets the ball"
+      - "dwell time"
+    comparative:
+      - "plays well above its price point"
+      - "outperforms many recent launches"
+      - "still holds up"
+      - "flips that script"
+    guidance:
+      - "If you're willing to [tradeoff], [paddle] will usually help you [outcome]"
+      - "This amplifies what you bring. It doesn't manufacture it."
+      - "Once tuned properly..."
   avoid:
-    - "corporate marketing speak"
-    - "hype without substance"
-    - "unverified claims"
-    - "overly salesy language"
-    # TODO: Any specific words/phrases Braydon never uses?
+    words:
+      - "game-changer"
+      - "revolutionary"
+      - "best paddle ever"
+      - "you need this"
+      - "amazing"
+      - "incredible"
+      - "take your game to the next level"
+      - "feel the difference"
+    patterns:
+      - "exclamation points (almost never)"
+      - "aggressive CTAs (BUY NOW!, Limited time!)"
+      - "rhetorical or leading questions"
+      - "walls of text (max 5-6 sentence paragraphs)"
+      - "passive voice for opinions (It could be argued → I believe)"
+      - "marketing superlatives without evidence"
+      - "chronological play-by-play (organize by characteristic, not timeline)"
   examples:
-    - "If it's reviewed here, it's been tested on court."
-    - "All paddle specs are measured in-house for accuracy you can trust."
-    # TODO: Add more example sentences that capture Braydon's voice
+    good:
+      - "The J6CR sits in the middle of the modern power category offensively and carries that now-familiar stiff, hollow foam feel."
+      - "Bottom line: If you want an elongated foam power paddle that's maneuverable, tunable, and slightly more controlled than most in its class, the J6CR is a strong option."
+      - "The power and pop are in a nice sweet spot. There's enough to stay dangerous, but not so much that you need pro-level mechanics to control it."
+      - "Whether the paddle lasts two months or two years, their stance right now is that polymer performs better. Do I agree with that? Not entirely."
+    bad:
+      - "The incredible new J6CR paddle is an absolute game-changer! With its revolutionary foam core technology, you'll experience unmatched power and control."
+      - "This amazing paddle is perfect for all skill levels and will take your game to the next level."
+  review_structure:
+    - "Opening: brand context + personal connection + thesis on what makes this notable"
+    - "Specs table: static weight, swing weight, twist weight, balance, spin RPMs, price w/ discount code"
+    - "Performance scorecard: 6 metrics on /10 scale"
+    - "Performance analysis: subsections by characteristic (not chronological)"
+    - "Feel map: soft/stiff and dense/hollow axes placement"
+    - "Custom setup: goal → materials → placement → before/after metrics → fine-tuning"
+    - "Market comparison: 3-6 comparable paddles, ranked on specific metrics"
+    - "Buy If / Pass If: 3-5 bullet points each, specific and actionable"
+    - "Bottom line: single clear verdict sentence"
+  brand_voice_guide: "reports/brand_voice_guide.md"
 
 # Ideal Customer Profile
 icp:

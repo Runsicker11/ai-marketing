@@ -1,0 +1,16 @@
+{
+  "action_id": "act_73b6e3e59731",
+  "action_type": "shift_budget",
+  "platform": "google_ads",
+  "entity_id": "23070925361",
+  "entity_name": "Brand",
+  "current_value": "$15.17/day",
+  "proposed_value": "$12.14/day",
+  "rationale": "Shift from Search_Campaign_2025-06-27_V1 (22718299131): Brand campaign delivers 2.90 ROAS (highest of Google campaigns) at $14.37 CPA, indicating efficient branded intent capture. Search campaign underperforms at 1.83 ROAS. Reallocating 20% to maximize branded conversions on high-margin products.",
+  "expected_impact": "Budget: $15.17 \u2192 $12.14/day",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:03:43",
+  "decided_at": null,
+  "executed_at": null
+}

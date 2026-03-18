@@ -1,0 +1,16 @@
+{
+  "action_id": "act_19aee602fdeb",
+  "action_type": "add_as_keyword",
+  "platform": "google_ads",
+  "entity_id": "unknown",
+  "entity_name": "Product Generic Campaign",
+  "current_value": "not a keyword yet",
+  "proposed_value": "tungsten tape [exact]",
+  "rationale": "Core product term with 9 conversions and 32.15 ROAS from minimal spend. Exact match ensures we don't overspend on broader variations while capturing high-intent searches.",
+  "expected_impact": "Potential $30-50/week additional revenue",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:01:44",
+  "decided_at": null,
+  "executed_at": null
+}

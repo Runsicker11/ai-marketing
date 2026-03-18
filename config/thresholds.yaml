@@ -37,3 +37,12 @@ autonomy_levels:
     - "pause_campaign"
     - "launch_new_creative"
     - "keyword_changes"
+
+autonomy:
+  shadow_mode: true                # Proposals created, never auto-executed
+  max_proposals_per_run: 10        # Cap proposals per --propose invocation
+  kill_switch:
+    metric: blended_mer            # From vw_true_roas
+    threshold: 1.0                 # Below 1.0 = losing money on every dollar
+    lookback_days: 14
+    action: alert_pause_all        # Recommend pausing all paid ads

@@ -13,6 +13,11 @@ venv/
 
 # Generated reports (contain business data)
 reports/*.md
+reports/*.html
+reports/*.json
+
+# Claude Code
+.claude/
 
 # GCP
 service-account*.json

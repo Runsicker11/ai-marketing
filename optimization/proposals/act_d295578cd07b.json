@@ -1,0 +1,16 @@
+{
+  "action_id": "act_d295578cd07b",
+  "action_type": "add_negative_keyword",
+  "platform": "google_ads",
+  "entity_id": "unknown",
+  "entity_name": "All Campaigns",
+  "current_value": "search_term: bodhi tungsten tape",
+  "proposed_value": "bodhi tungsten tape",
+  "rationale": "Competitor brand search (Bodhi Performance) with $16.57 spend and zero conversions. Users searching for competitor products are unlikely to convert.",
+  "expected_impact": "Save ~$16/week",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:03:05",
+  "decided_at": null,
+  "executed_at": null
+}

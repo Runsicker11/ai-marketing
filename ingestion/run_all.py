@@ -28,6 +28,8 @@ def main():
                         help="Run AI analysis after ingestion (daily report + alerts)")
     parser.add_argument("--analyze-only", action="store_true",
                         help="Only run AI analysis (skip ingestion)")
+    parser.add_argument("--optimize", action="store_true",
+                        help="Run optimization proposals after analysis (search terms + budget)")
     args = parser.parse_args()
 
     run_all = not (args.shopify_only or args.meta_only or args.google_only
@@ -65,11 +67,11 @@ def main():
             from ingestion.search_console.run import run as run_search_console
             run_search_console(days_back=args.days_back)
 
-        # Deploy views
-        if run_all or args.views_only:
-            log.info("=== Deploying Views ===")
-            from ingestion.views.deploy_views import deploy
-            deploy()
+        # Views are now managed by dbt in pickleball-data-platform.
+        # Do NOT deploy from here — it would overwrite dbt compat views.
+        if args.views_only:
+            log.warning("View deployment disabled — views are managed by dbt "
+                        "in pickleball-data-platform.")
 
         # AI Analysis
         if args.analyze or args.analyze_only:
@@ -78,6 +80,26 @@ def main():
             from ingestion.analysis.alerts import check as run_alerts
             gen_daily()
             run_alerts()
+
+        # Optimization Proposals
+        if args.optimize:
+            log.info("=== Optimization Proposals ===")
+            from optimization.search_terms import review_and_propose
+            from optimization.budget import recommend_and_propose
+            from optimization.actions import list_pending_proposals
+            from ingestion.utils.slack import send_slack, format_proposal_summary
+
+            st_count = review_and_propose()
+            log.info(f"Created {st_count} search term proposals")
+
+            budget_count = recommend_and_propose()
+            log.info(f"Created {budget_count} budget proposals")
+
+            if st_count + budget_count > 0:
+                proposals = list_pending_proposals()
+                if proposals:
+                    slack_msg = format_proposal_summary(proposals)
+                    send_slack(slack_msg)
 
         log.info("=== All ingestion complete ===")
 

@@ -1,0 +1,16 @@
+{
+  "action_id": "act_07505a1ec698",
+  "action_type": "add_negative_keyword",
+  "platform": "google_ads",
+  "entity_id": "unknown",
+  "entity_name": "All Campaigns",
+  "current_value": "search_term: pickleball paddles",
+  "proposed_value": "pickleball paddles",
+  "rationale": "Generic paddle search with $15.80 spend, 3.18% CTR, and zero conversions. We sell accessories, not paddles\u2014this attracts wrong audience.",
+  "expected_impact": "Save ~$15/week",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:03:13",
+  "decided_at": null,
+  "executed_at": null
+}

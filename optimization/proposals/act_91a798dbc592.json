@@ -1,0 +1,16 @@
+{
+  "action_id": "act_91a798dbc592",
+  "action_type": "add_negative_keyword",
+  "platform": "google_ads",
+  "entity_id": "unknown",
+  "entity_name": "All Campaigns",
+  "current_value": "search_term: lead tape for golf clubs",
+  "proposed_value": "lead tape for golf clubs",
+  "rationale": "Golf-related term with $17.66 spend and zero conversions. Completely irrelevant to pickleball product line.",
+  "expected_impact": "Save ~$17/week",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:03:02",
+  "decided_at": null,
+  "executed_at": null
+}

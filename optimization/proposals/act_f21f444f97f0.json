@@ -1,0 +1,16 @@
+{
+  "action_id": "act_f21f444f97f0",
+  "action_type": "add_negative_keyword",
+  "platform": "google_ads",
+  "entity_id": "unknown",
+  "entity_name": "All Campaigns",
+  "current_value": "search_term: tungsten tape for golf clubs",
+  "proposed_value": "tungsten tape for golf clubs",
+  "rationale": "Spent $18.46 with zero conversions on golf-related searches. We sell pickleball products, not golf accessories.",
+  "expected_impact": "Save ~$18/week",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:02:59",
+  "decided_at": null,
+  "executed_at": null
+}

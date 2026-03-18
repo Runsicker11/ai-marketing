@@ -1,0 +1,16 @@
+{
+  "action_id": "act_dc2769a71adb",
+  "action_type": "add_negative_keyword",
+  "platform": "google_ads",
+  "entity_id": "unknown",
+  "entity_name": "All Campaigns",
+  "current_value": "search_term: udrippin grips",
+  "proposed_value": "udrippin grips",
+  "rationale": "Competitor brand search (UDrippin) with $15 spend and zero conversions. Brand-specific searches have low conversion potential.",
+  "expected_impact": "Save ~$15/week",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:03:09",
+  "decided_at": null,
+  "executed_at": null
+}

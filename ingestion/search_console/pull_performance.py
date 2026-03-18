@@ -36,7 +36,7 @@ def pull_performance(start_date: date, end_date: date, site_url: str) -> list[di
     Returns:
         List of dicts matching SEARCH_CONSOLE_PERFORMANCE schema.
     """
-    service = get_service()
+    service = get_service(site_url)
     site = _site_label(site_url)
     now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 

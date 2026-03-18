@@ -1,0 +1,16 @@
+{
+  "action_id": "act_7a2b7fc22127",
+  "action_type": "add_as_keyword",
+  "platform": "google_ads",
+  "entity_id": "unknown",
+  "entity_name": "Brand/Shop Campaign",
+  "current_value": "not a keyword yet",
+  "proposed_value": "pickleball effect shop [exact]",
+  "rationale": "Exceptional performer with 78.31 ROAS and 16.7 conversions from only $9.02 spend. This is a high-intent branded term that should be captured with exact match to control costs and maximize volume.",
+  "expected_impact": "Potential $50-100/week additional revenue",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:01:14",
+  "decided_at": null,
+  "executed_at": null
+}

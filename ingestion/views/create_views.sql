@@ -923,3 +923,80 @@ GROUP BY ac.ad_id, ac.campaign_id, ac.campaign_name, ac.ad_group_id,
          ac.ad_group_name, ac.ad_type, ac.asset_type, ac.asset_text,
          ac.performance_label
 ;
+
+-- ============================================================
+-- Product Profitability
+-- ============================================================
+
+-- 19. vw_product_profitability
+-- Product-level profitability: joins Shopify line items to product COGS data.
+-- Includes all items (with or without SKU) so totals match Shopify Analytics.
+-- Tuning Clamps are a partnership deal — partner ships & pays back 80% of product price.
+-- We keep 40% of product price (20% product share + shipping pass-through), zero COGS.
+-- Uses 40% of net revenue as estimated COGS for unmapped/SKU-less items.
+-- {product_dataset} is replaced at deploy time.
+CREATE OR REPLACE VIEW `{dataset}.vw_product_profitability` AS
+WITH line_items AS (
+    SELECT
+        COALESCE(NULLIF(li.sku, ''), CONCAT('NO_SKU_', REPLACE(li.title, ' ', '_'))) AS sku,
+        li.title,
+        DATE(o.created_at) AS order_date,
+        li.title = 'Tuning Clamps' AS is_partnership,
+        SUM(li.quantity) AS units_sold,
+        SUM(CAST(li.price AS FLOAT64) * li.quantity) AS gross_revenue,
+        SUM(li.total_discount) AS total_discounts,
+        -- Partnership items: we only keep 20% of the sale price
+        SUM(
+            CASE WHEN li.title = 'Tuning Clamps'
+                 THEN (CAST(li.price AS FLOAT64) * li.quantity - li.total_discount) * 0.40
+                 ELSE CAST(li.price AS FLOAT64) * li.quantity - li.total_discount
+            END
+        ) AS net_revenue
+    FROM `{dataset}.shopify_order_line_items` li
+    JOIN `{dataset}.shopify_orders` o ON li.order_id = o.order_id
+    GROUP BY sku, li.title, DATE(o.created_at)
+),
+cogs_lookup AS (
+    SELECT
+        LOWER(TRIM(sku)) AS sku_key,
+        AVG(cogs) AS unit_cost
+    FROM `{product_dataset}.amazon_product_map`
+    WHERE sku IS NOT NULL AND cogs IS NOT NULL
+    GROUP BY sku_key
+)
+SELECT
+    li.sku,
+    li.title,
+    li.order_date,
+    li.units_sold,
+    li.gross_revenue,
+    li.total_discounts,
+    li.net_revenue,
+    li.is_partnership,
+    -- Partnership = zero COGS; actual COGS from product map; else 40% estimate
+    CASE
+        WHEN li.is_partnership THEN 0
+        WHEN c.unit_cost IS NOT NULL THEN c.unit_cost * li.units_sold
+        ELSE li.net_revenue * 0.40
+    END AS total_cogs,
+    li.net_revenue - CASE
+        WHEN li.is_partnership THEN 0
+        WHEN c.unit_cost IS NOT NULL THEN c.unit_cost * li.units_sold
+        ELSE li.net_revenue * 0.40
+    END AS gross_profit,
+    SAFE_DIVIDE(
+        li.net_revenue - CASE
+            WHEN li.is_partnership THEN 0
+            WHEN c.unit_cost IS NOT NULL THEN c.unit_cost * li.units_sold
+            ELSE li.net_revenue * 0.40
+        END,
+        li.net_revenue
+    ) AS gross_margin,
+    CASE
+        WHEN li.is_partnership THEN TRUE
+        WHEN c.unit_cost IS NOT NULL THEN TRUE
+        ELSE FALSE
+    END AS has_actual_cogs
+FROM line_items li
+LEFT JOIN cogs_lookup c ON LOWER(TRIM(li.sku)) = c.sku_key
+;

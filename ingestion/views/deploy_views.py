@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from ingestion.utils.config import GCP_PROJECT_ID, BQ_DATASET, GA4_DATASET
+from ingestion.utils.config import GCP_PROJECT_ID, BQ_DATASET, GA4_DATASET, PRODUCT_DATASET
 from ingestion.utils.bq_client import get_client
 from ingestion.utils.logger import get_logger
 
@@ -18,6 +18,7 @@ def deploy():
     sql = SQL_FILE.read_text(encoding="utf-8")
     sql = sql.replace("{dataset}", dataset_ref)
     sql = sql.replace("{ga4_dataset}", GA4_DATASET)
+    sql = sql.replace("{product_dataset}", PRODUCT_DATASET)
 
     # Split on CREATE OR REPLACE VIEW to get individual statements
     statements = []

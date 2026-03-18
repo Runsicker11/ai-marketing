@@ -1,0 +1,16 @@
+{
+  "action_id": "act_062e47875058",
+  "action_type": "add_as_keyword",
+  "platform": "google_ads",
+  "entity_id": "unknown",
+  "entity_name": "Brand Product Campaign",
+  "current_value": "not a keyword yet",
+  "proposed_value": "pickleball effect tungsten tape [exact]",
+  "rationale": "Strong branded product term with 15 conversions and 15.76 ROAS. Exact match will ensure we capture this high-intent traffic efficiently.",
+  "expected_impact": "Potential $40-60/week additional revenue",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:01:18",
+  "decided_at": null,
+  "executed_at": null
+}

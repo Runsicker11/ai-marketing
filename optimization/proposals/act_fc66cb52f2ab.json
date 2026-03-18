@@ -1,0 +1,16 @@
+{
+  "action_id": "act_fc66cb52f2ab",
+  "action_type": "add_as_keyword",
+  "platform": "google_ads",
+  "entity_id": "unknown",
+  "entity_name": "Product Campaign",
+  "current_value": "not a keyword yet",
+  "proposed_value": "paddle tuning tape [exact]",
+  "rationale": "Exceptional ROI with 92.46 ROAS and 4 conversions from $1.26 spend. This is a product we sell and shows clear purchase intent.",
+  "expected_impact": "Potential $25-40/week additional revenue",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:01:49",
+  "decided_at": null,
+  "executed_at": null
+}

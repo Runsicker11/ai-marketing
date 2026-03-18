@@ -1,0 +1,16 @@
+{
+  "action_id": "act_0f06c9bc75f2",
+  "action_type": "shift_budget",
+  "platform": "google_ads",
+  "entity_id": "22796253273",
+  "entity_name": "Shopping - All Product",
+  "current_value": "$14.85/day",
+  "proposed_value": "$17.82/day",
+  "rationale": "Shift from Brand (23070925361): Shopping drives 89.7 conversions (3x more than Brand's 31) with strong 2.60 ROAS. With top products being high-margin (Paddle Tuning Tape 93.9%, Tuning Clamps 100%), increasing Shopping spend captures more mid-funnel demand profitably.",
+  "expected_impact": "Budget: $14.85 \u2192 $17.82/day",
+  "risk_level": "medium",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:03:47",
+  "decided_at": null,
+  "executed_at": null
+}

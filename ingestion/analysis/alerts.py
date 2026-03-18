@@ -322,6 +322,11 @@ def check(report_date: date | None = None, to_stdout: bool = False) -> str:
             f"{analysis}"
         )
 
+        # Send alert summary to Slack
+        from ingestion.utils.slack import send_slack, format_alert_summary
+        slack_msg = format_alert_summary(all_alerts)
+        send_slack(slack_msg)
+
     if to_stdout:
         print(report)
     else:

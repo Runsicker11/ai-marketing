@@ -1,0 +1,16 @@
+{
+  "action_id": "act_f001072d271a",
+  "action_type": "shift_budget",
+  "platform": "google_ads",
+  "entity_id": "22796253273",
+  "entity_name": "Shopping - All Product",
+  "current_value": "$15.17/day",
+  "proposed_value": "$12.14/day",
+  "rationale": "Shift from Search_Campaign_2025-06-27_V1 (22718299131): Search campaign has lowest ROAS at 1.83 and highest CPA at $19.70. Shopping campaign drives 2.60 ROAS with $11.96 CPA and likely captures high-margin product sales (Tungsten Tape, Paddle Tuning Tape). Shifting 20% ($3.03/day) to better performer.",
+  "expected_impact": "Budget: $15.17 \u2192 $12.14/day",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:03:38",
+  "decided_at": null,
+  "executed_at": null
+}

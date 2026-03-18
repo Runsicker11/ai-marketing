@@ -11,8 +11,8 @@ from ingestion.utils.logger import get_logger
 log = get_logger(__name__)
 
 _BRAND_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "brand.yaml"
-_MODEL = "claude-haiku-4-5-20251001"
-_MAX_TOKENS = 4096
+_DEFAULT_MODEL = "claude-haiku-4-5-20251001"
+_MAX_TOKENS = 8192
 
 
 def _load_brand_context() -> str:
@@ -40,17 +40,21 @@ def _load_brand_context() -> str:
     return "\n".join(parts)
 
 
-def analyze(system_prompt: str, data_context: str, question: str) -> str:
+def analyze(system_prompt: str, data_context: str, question: str,
+            model: str | None = None) -> str:
     """Send data + question to Claude and return the analysis.
 
     Args:
         system_prompt: Role/instructions for Claude.
         data_context: Formatted data tables/metrics to analyze.
         question: Specific question or task for Claude.
+        model: Model ID override. Defaults to Haiku 4.5.
+               Use "claude-sonnet-4-5-20250929" for structured JSON extraction.
 
     Returns:
         Claude's response text.
     """
+    use_model = model or _DEFAULT_MODEL
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     brand_ctx = _load_brand_context()
 
@@ -64,11 +68,11 @@ def analyze(system_prompt: str, data_context: str, question: str) -> str:
         f"## Task\n\n{question}"
     )
 
-    log.info(f"Sending analysis request to {_MODEL} "
+    log.info(f"Sending analysis request to {use_model} "
              f"({len(user_message)} chars of context)")
 
     response = client.messages.create(
-        model=_MODEL,
+        model=use_model,
         max_tokens=_MAX_TOKENS,
         system=full_system,
         messages=[{"role": "user", "content": user_message}],

@@ -15,5 +15,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=/app
 
 # Secret Manager mounts .env at /secrets/.env — copy it into /app at runtime
-# Run alerts daily; add weekly strategy on Sundays (day 0)
-CMD ["sh", "-c", "cp /secrets/.env /app/.env 2>/dev/null; python -m ingestion.analysis.run --alerts && if [ $(date -u +%w) -eq 0 ]; then python -m ingestion.analysis.run --weekly; fi"]
+# Weekday schedule: alerts + optimization proposals (Slack notified)
+# Weekly strategy runs on Sundays (day 0)
+CMD ["sh", "-c", "cp /secrets/.env /app/.env 2>/dev/null; python -m ingestion.analysis.run --alerts --optimize && if [ $(date -u +%w) -eq 1 ]; then python -m ingestion.analysis.run --weekly; fi"]

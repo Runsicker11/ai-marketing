@@ -1,0 +1,16 @@
+{
+  "action_id": "act_0f3e61774ba6",
+  "action_type": "add_as_keyword",
+  "platform": "google_ads",
+  "entity_id": "unknown",
+  "entity_name": "Brand Campaign",
+  "current_value": "not a keyword yet",
+  "proposed_value": "pb effect [exact]",
+  "rationale": "Strong branded abbreviation with 7 conversions and 34.72 ROAS from $7.83. Captures users familiar with brand who use shorthand.",
+  "expected_impact": "Potential $20-35/week additional revenue",
+  "risk_level": "low",
+  "status": "proposed",
+  "proposed_at": "2026-03-17 20:03:18",
+  "decided_at": null,
+  "executed_at": null
+}

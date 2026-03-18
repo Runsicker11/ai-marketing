@@ -28,8 +28,9 @@ Report format:
 7. **Google Ads Keyword Strategy** (top keywords to expand, wasted spend to cut, quality score issues)
 8. **Negative Keyword Recommendations** (search terms wasting money — list exact terms to add as negatives)
 9. **SEO Opportunities** (striking-distance keywords, content gaps, ranking changes)
-10. **Competitive Context** (how our metrics compare to expectations)
-11. **Next Week Priorities** (top 3-5 specific actions ranked by expected impact)
+10. **Product Profitability** (which products have best margins, where COGS data is estimated vs actual, profit-per-unit insights)
+11. **Competitive Context** (how our metrics compare to expectations)
+12. **Next Week Priorities** (top 3-5 specific actions ranked by expected impact)
 
 Use exact numbers. Be specific about dollar amounts and percentages. \
 Recommend bold moves when the data supports them, but flag risks clearly.\
@@ -231,6 +232,42 @@ def _query_seo_opportunities() -> str:
     return "\n".join(lines)
 
 
+def _query_profitability_summary() -> str:
+    """SKU-level profitability for the last 30 days."""
+    sql = f"""
+    SELECT
+        sku,
+        title,
+        SUM(units_sold) AS units,
+        SUM(net_revenue) AS revenue,
+        SUM(total_cogs) AS cogs,
+        SUM(gross_profit) AS profit,
+        SAFE_DIVIDE(SUM(gross_profit), SUM(net_revenue)) AS margin,
+        LOGICAL_OR(has_actual_cogs) AS has_actual_cogs
+    FROM `{_DS}.vw_product_profitability`
+    WHERE order_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+    GROUP BY sku, title
+    ORDER BY profit DESC
+    LIMIT 15
+    """
+    try:
+        rows = list(run_query(sql))
+    except Exception:
+        return "No profitability data available (view may not be deployed yet)."
+    if not rows:
+        return "No profitability data for the last 30 days."
+    header = "sku | product | units | revenue | cogs | profit | margin | source"
+    lines = [header, "-" * len(header)]
+    for r in rows:
+        source = "actual" if r.has_actual_cogs else "est_40%"
+        lines.append(
+            f"{r.sku} | {r.title} | {r.units} | "
+            f"${r.revenue or 0:.2f} | ${r.cogs or 0:.2f} | "
+            f"${r.profit or 0:.2f} | {r.margin or 0:.1%} | {source}"
+        )
+    return "\n".join(lines)
+
+
 def _query_product_insights() -> str:
     sql = f"""
     SELECT item_name, product_views, add_to_carts, purchases, revenue,
@@ -282,6 +319,7 @@ def generate(week_end: date | None = None, to_stdout: bool = False) -> str:
     keyword_data = _query_keyword_performance()
     waste_data = _query_search_term_waste()
     seo_data = _query_seo_opportunities()
+    profitability_data = _query_profitability_summary()
 
     data_context = (
         f"### Weekly ROAS by Channel ({week_start} to {week_end})\n{roas_data}\n\n"
@@ -289,6 +327,7 @@ def generate(week_end: date | None = None, to_stdout: bool = False) -> str:
         f"### Daily Trends\n{trends_data}\n\n"
         f"### Ad Performance (Top 15)\n{ads_data}\n\n"
         f"### Product Insights (Last 90 Days)\n{product_data}\n\n"
+        f"### Product Profitability (Last 30 Days)\n{profitability_data}\n\n"
         f"### Google Ads Keyword Performance\n{keyword_data}\n\n"
         f"### Wasted Search Terms (Zero Conversions)\n{waste_data}\n\n"
         f"### SEO Opportunities (Striking Distance)\n{seo_data}"

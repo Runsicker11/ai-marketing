@@ -25,6 +25,10 @@ ACTION_TYPES = {
         "description": "Add a negative keyword to a campaign or ad group",
         "requires_approval": True,
     },
+    "add_as_keyword": {
+        "description": "Add a search term as a keyword to a campaign",
+        "requires_approval": True,
+    },
     "adjust_bid": {
         "description": "Adjust keyword or ad group bid",
         "requires_approval": True,
@@ -258,6 +262,115 @@ def _execute_google_ads_action(action: dict):
             operations=[operation],
         )
         log.info(f"Paused keyword {entity_id}")
+
+    elif action_type == "add_as_keyword":
+        # Add a search term as a keyword to an ad group
+        # entity_id = ad group ID, proposed_value = "keyword text [match_type]"
+        ad_group_criterion_service = client.get_service("AdGroupCriterionService")
+        operation = client.get_type("AdGroupCriterionOperation")
+        criterion = operation.create
+
+        criterion.ad_group = client.get_service("GoogleAdsService").ad_group_path(
+            GOOGLE_ADS_CUSTOMER_ID, entity_id
+        )
+
+        # Parse match type from proposed_value if present (e.g. "tungsten tape [exact]")
+        keyword_text = proposed_value
+        match_type = client.enums.KeywordMatchTypeEnum.BROAD  # default
+        if proposed_value.endswith("]") and "[" in proposed_value:
+            keyword_text = proposed_value[:proposed_value.rfind("[")].strip()
+            match_str = proposed_value[proposed_value.rfind("[") + 1:-1].strip().upper()
+            match_map = {
+                "EXACT": client.enums.KeywordMatchTypeEnum.EXACT,
+                "PHRASE": client.enums.KeywordMatchTypeEnum.PHRASE,
+                "BROAD": client.enums.KeywordMatchTypeEnum.BROAD,
+            }
+            match_type = match_map.get(match_str, match_type)
+
+        criterion.keyword.text = keyword_text
+        criterion.keyword.match_type = match_type
+        criterion.status = client.enums.AdGroupCriterionStatusEnum.ENABLED
+
+        ad_group_criterion_service.mutate_ad_group_criteria(
+            customer_id=GOOGLE_ADS_CUSTOMER_ID,
+            operations=[operation],
+        )
+        log.info(f"Added keyword '{keyword_text}' to ad group {entity_id}")
+
+    elif action_type == "adjust_bid":
+        # Update CPC bid for an ad group criterion
+        # entity_id = "adGroupId_criterionId", proposed_value = new bid in dollars
+        ad_group_criterion_service = client.get_service("AdGroupCriterionService")
+        operation = client.get_type("AdGroupCriterionOperation")
+        criterion = operation.update
+
+        parts = entity_id.split("_")
+        ad_group_id, criterion_id = parts[0], parts[1]
+
+        criterion.resource_name = client.get_service(
+            "GoogleAdsService"
+        ).ad_group_criterion_path(
+            GOOGLE_ADS_CUSTOMER_ID, ad_group_id, criterion_id
+        )
+
+        # Convert dollars to micros
+        bid_micros = int(float(proposed_value) * 1_000_000)
+        criterion.cpc_bid_micros = bid_micros
+
+        field_mask = client.get_type("FieldMask")
+        field_mask.paths.append("cpc_bid_micros")
+        operation.update_mask.CopyFrom(field_mask)
+
+        ad_group_criterion_service.mutate_ad_group_criteria(
+            customer_id=GOOGLE_ADS_CUSTOMER_ID,
+            operations=[operation],
+        )
+        log.info(f"Adjusted bid for {entity_id} to ${proposed_value}")
+
+    elif action_type == "shift_budget":
+        # Update daily budget for a campaign
+        # entity_id = campaign ID, proposed_value = new daily budget in dollars
+        # (e.g. "$25.00/day" or "25.00")
+        ga_service = client.get_service("GoogleAdsService")
+
+        # Look up the campaign's budget resource name
+        query = (
+            f"SELECT campaign.campaign_budget "
+            f"FROM campaign "
+            f"WHERE campaign.id = {entity_id}"
+        )
+        response = ga_service.search_stream(
+            customer_id=GOOGLE_ADS_CUSTOMER_ID, query=query
+        )
+        budget_resource_name = None
+        for batch in response:
+            for row in batch.results:
+                budget_resource_name = row.campaign.campaign_budget
+                break
+
+        if not budget_resource_name:
+            raise ValueError(f"Could not find budget for campaign {entity_id}")
+
+        # Parse dollar amount from proposed_value (handles "$25.00/day" or "25.00")
+        budget_str = proposed_value.replace("$", "").replace("/day", "").strip()
+        budget_micros = int(float(budget_str) * 1_000_000)
+
+        campaign_budget_service = client.get_service("CampaignBudgetService")
+        budget_operation = client.get_type("CampaignBudgetOperation")
+        budget = budget_operation.update
+
+        budget.resource_name = budget_resource_name
+        budget.amount_micros = budget_micros
+
+        field_mask = client.get_type("FieldMask")
+        field_mask.paths.append("amount_micros")
+        budget_operation.update_mask.CopyFrom(field_mask)
+
+        campaign_budget_service.mutate_campaign_budgets(
+            customer_id=GOOGLE_ADS_CUSTOMER_ID,
+            operations=[budget_operation],
+        )
+        log.info(f"Updated budget for campaign {entity_id} to ${budget_str}/day")
 
     else:
         raise NotImplementedError(
