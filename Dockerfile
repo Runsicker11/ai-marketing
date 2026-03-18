@@ -11,10 +11,13 @@ RUN uv sync --frozen --no-dev
 # Copy source code
 COPY . .
 
+# Create directories that are gitignored but needed at runtime
+RUN mkdir -p /app/reports /app/optimization/proposals /app/seo/drafts /app/content/generator/output
+
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=/app
 
 # Secret Manager mounts .env at /secrets/.env — copy it into /app at runtime
 # Weekday schedule: alerts + optimization proposals (Slack notified)
 # Weekly strategy runs on Sundays (day 0)
-CMD ["sh", "-c", "cp /secrets/.env /app/.env 2>/dev/null; python -m ingestion.analysis.run --alerts --optimize && if [ $(date -u +%w) -eq 1 ]; then python -m ingestion.analysis.run --weekly; fi"]
+CMD ["sh", "-c", "cp /secrets/.env /app/.env 2>/dev/null; python -m ingestion.analysis.run --alerts; python -m ingestion.analysis.run --optimize; if [ $(date -u +%w) -eq 1 ]; then python -m ingestion.analysis.run --weekly; fi"]

@@ -111,10 +111,14 @@ def _check_funnel_drop(report_date: date, pct: float) -> list[dict]:
     threshold = pct / 100.0 if pct > 1 else pct
     sql = f"""
     WITH daily_cvr AS (
-        SELECT report_date, overall_conversion_rate
+        -- Aggregate across all sources per day to get a single daily CVR
+        SELECT
+            report_date,
+            SAFE_DIVIDE(SUM(purchases), SUM(sessions)) AS overall_conversion_rate
         FROM `{_DS}.vw_ga4_funnel`
-        WHERE source IN ('facebook', 'google', '(direct)')
-            AND report_date BETWEEN '{report_date - timedelta(days=7)}' AND '{report_date}'
+        WHERE report_date BETWEEN '{report_date - timedelta(days=7)}' AND '{report_date}'
+            AND sessions > 0
+        GROUP BY report_date
     ),
     avg_cvr AS (
         SELECT AVG(overall_conversion_rate) AS avg_cvr
@@ -151,6 +155,7 @@ def _check_ctr_decline(report_date: date, days: int) -> list[dict]:
         FROM `{_DS}.vw_daily_performance`
         WHERE report_date BETWEEN '{report_date - timedelta(days=days + 1)}' AND '{report_date}'
             AND impressions >= 100
+            AND ad_name IS NOT NULL
     ),
     declining AS (
         SELECT ad_id, ad_name, report_date, ctr,
@@ -210,14 +215,21 @@ def _check_keyword_waste(report_date: date, ceiling: float) -> list[dict]:
 
 def _check_quality_score_drop(report_date: date, floor: int) -> list[dict]:
     """Check if any keyword's quality score dropped below floor."""
+    # Deduplicate by keyword_text — same keyword can exist in multiple ad groups
     sql = f"""
-    SELECT keyword_text, quality_score, campaign_id, ad_group_id,
-           expected_ctr, ad_relevance, landing_page_experience
+    SELECT keyword_text,
+           MIN(quality_score) AS quality_score,
+           ANY_VALUE(expected_ctr) AS expected_ctr,
+           ANY_VALUE(ad_relevance) AS ad_relevance,
+           ANY_VALUE(landing_page_experience) AS landing_page_experience
     FROM `{_DS}.google_ads_keywords`
     WHERE quality_score IS NOT NULL
         AND quality_score > 0
         AND quality_score < {floor}
         AND status = 'ENABLED'
+    GROUP BY keyword_text
+    ORDER BY quality_score ASC
+    LIMIT 10
     """
     alerts = []
     for r in run_query(sql):

@@ -51,10 +51,11 @@ def send_slack(
         return False
 
 
-def format_alert_summary(alerts: list[dict]) -> str:
+def format_alert_summary(alerts: list[dict], max_per_type: int = 3) -> str:
     """Format a list of alert dicts into a Slack-friendly summary.
 
-    Each alert dict should have: type, severity, message.
+    Deduplicates by (type, message) and caps each alert type at max_per_type
+    to prevent spam. Each alert dict should have: type, severity, message.
     """
     if not alerts:
         return ""
@@ -65,10 +66,42 @@ def format_alert_summary(alerts: list[dict]) -> str:
         "low": ":large_yellow_circle:",
     }
 
-    lines = [f":rotating_light: *{len(alerts)} Alert(s) Triggered*", ""]
+    # Deduplicate exact duplicates first
+    seen = set()
+    deduped = []
     for a in alerts:
+        key = (a["type"], a["message"])
+        if key not in seen:
+            seen.add(key)
+            deduped.append(a)
+
+    # Cap each alert type so one noisy check can't flood the message
+    type_counts: dict[str, int] = {}
+    capped = []
+    truncated_types: dict[str, int] = {}
+    for a in deduped:
+        t = a["type"]
+        type_counts[t] = type_counts.get(t, 0) + 1
+        if type_counts[t] <= max_per_type:
+            capped.append(a)
+        else:
+            truncated_types[t] = truncated_types.get(t, 0) + 1
+
+    total_raw = len(alerts)
+    total_deduped = len(deduped)
+    dedupe_note = (
+        f" ({total_raw - total_deduped} duplicates removed)" if total_raw != total_deduped else ""
+    )
+
+    lines = [f":rotating_light: *{total_deduped} Alert(s) Triggered*{dedupe_note}", ""]
+    for a in capped:
         emoji = severity_emoji.get(a.get("severity", "medium"), ":white_circle:")
         lines.append(f"{emoji} *{a['type']}*: {a['message']}")
+
+    if truncated_types:
+        lines.append("")
+        for t, n in truncated_types.items():
+            lines.append(f"_...and {n} more {t} alert(s) — see full report_")
 
     lines.append("")
     lines.append("Full report saved to `reports/` directory.")
