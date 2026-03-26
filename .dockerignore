@@ -12,3 +12,14 @@ optimization/proposals/
 .ruff_cache
 .claude/
 nul
+
+# Data ingestion is managed by pickleball-data-platform (dlt pipelines + dbt).
+# These modules are kept for reference but excluded from the container image.
+ingestion/google_ads/
+ingestion/meta/
+ingestion/shopify/
+ingestion/search_console/
+ingestion/views/
+ingestion/run_all.py
+ingestion/schemas.py
+ingestion/setup_bigquery.py
