@@ -32,6 +32,10 @@ def main():
                         help="Sync WordPress + Shopify blog content inventory to BigQuery")
     parser.add_argument("--score", action="store_true",
                         help="Score published content performance")
+    parser.add_argument("--optimize-meta", action="store_true",
+                        help="Generate Yoast title/description proposals for underperforming pages")
+    parser.add_argument("--apply-meta-proposals", action="store_true",
+                        help="Apply approved proposals from the most recent meta optimization file")
     parser.add_argument("--all", action="store_true",
                         help="Run full cycle: opportunities -> generate -> score")
     parser.add_argument("--type", type=str, default="review",
@@ -49,7 +53,8 @@ def main():
     args = parser.parse_args()
 
     if not any([args.opportunities, args.generate, args.publish_drafts,
-                args.sync_inventory, args.score, args.all]):
+                args.sync_inventory, args.score, args.optimize_meta,
+                args.apply_meta_proposals, args.all]):
         parser.print_help()
         return
 
@@ -86,6 +91,19 @@ def main():
         if args.publish_drafts:
             log.info("--- Publishing drafts ---")
             _publish_pending_drafts()
+
+        if args.optimize_meta:
+            log.info("--- Generating SEO meta optimization proposals ---")
+            from seo.meta_optimizer import propose
+            path = propose(to_stdout=args.to_stdout)
+            if path and not args.to_stdout:
+                log.info(f"Review proposals at: {path}")
+
+        if args.apply_meta_proposals:
+            log.info("--- Applying approved meta proposals ---")
+            from seo.meta_optimizer import apply
+            updated = apply()
+            log.info(f"Applied {updated} meta updates")
 
         if args.all or args.score:
             log.info("--- Scoring published content ---")
