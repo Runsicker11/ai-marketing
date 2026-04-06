@@ -47,6 +47,16 @@ Rules — MUST follow every one:
 - For reviews: hint at the verdict angle. For lists: hint at the ranking criteria.
 - No exclamation marks. No ALL CAPS. No "Click here".
 
+Pickleball domain rules — strictly enforce:
+- Power = pace, pop, drive, punch, offensive play. NEVER "distance", "max distance",
+  "yards", "trajectory", "launch angle" — this is not golf or tennis.
+- Control = touch, placement, dink, reset, soft game, kitchen play.
+- Correct player terms: bangers, soft-game players, all-court players, 3.5/4.0/5.0 players.
+- Correct shot terms: dink, reset, drive, ATP, erne, third-shot drop, speedup, flick.
+- Paddle terms: thermoformed, foam core, twist weight, swing weight, spin RPM,
+  elongated, standard shape, edge guard, lead tape, raw carbon, fiberglass, kevlar.
+- Never use golf/baseball/tennis terms that don't apply to pickleball.
+
 Output format — return ONLY a JSON array, one object per page, in the same order
 as the input. Each object: {"id": <wp_id>, "type": "<posts|pages>",
 "proposed_title": "...", "proposed_description": "..."}
@@ -210,7 +220,7 @@ def _generate_proposals(batch: list[dict]) -> list[dict]:
         f"{len(batch)} pages. Return ONLY the JSON array as specified."
     )
 
-    raw = analyze(SYSTEM_PROMPT, data_context, question)
+    raw = analyze(SYSTEM_PROMPT, data_context, question, model="claude-sonnet-4-6")
 
     # Parse JSON from response (strip any accidental markdown fences)
     json_str = re.sub(r"^```[a-z]*\n?|```$", "", raw.strip(), flags=re.MULTILINE).strip()
