@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Add Weight to a Pickleball Paddle – Pickleball Effect</title>
+  <meta name="description" content="Step-by-step guide to adding weight to your pickleball paddle using tungsten tape. Where to place it, how much to add, and what difference it actually makes." />
+
+  <!--
+    Font note: The Elementor "global" font variables (Vinila Test, weight 300) are overridden by
+    element-specific styles in the actual theme. The screenshots show standard-weight (400) body text
+    and bold (700) headings — not the light condensed global defaults.
+    Using Inter here as a neutral match for the preview. WordPress will render with the theme's actual fonts.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    /*
+    ═══════════════════════════════════════════════════════════════════
+    WHAT THIS FILE IS
+
+    This is a CONTENT PREVIEW — it shows what the article body looks like
+    when rendered inside WordPress.
+
+    The surrounding page (nav, sidebar, footer) comes from the WordPress
+    theme automatically. We do NOT inject those — WordPress handles them.
+
+    The only thing we send via the WordPress REST API is the HTML inside
+    the <article class="pe-article-body"> block below.
+
+    TO USE THIS FILE:
+      1. Open in browser to preview the article look and feel
+      2. Once approved, copy everything between the <!-- CONTENT START -->
+         and <!-- CONTENT END --> comments
+      3. That chunk is what goes into WordPress via the API
+
+    ═══════════════════════════════════════════════════════════════════
+    */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* ── Exact Elementor colors (confirmed from DevTools) ─────── */
+      --color-primary:      #222825;   /* headings — near-black */
+      --color-secondary:    #54595F;   /* labels, subheadings */
+      --color-text:         #7A7A7A;   /* body text (Elementor global) */
+      --color-green:        #21484B;   /* TOC bg, nav, CTA banners */
+      --color-orange:       #D85E3C;   /* buttons */
+      --color-lime:         #D6E28B;   /* TOC title, step numbers, tip accents */
+      --color-teal:         #80BBBC;   /* links */
+      --color-bg:           #FFFFFF;   /* page body bg — reset.css sets #fff */
+      --color-white:        #FFFFFF;
+
+      /* Derived */
+      --color-green-light:  #deeaeb;
+      --color-lime-light:   #f5f8d8;
+      --color-orange-hover: #be4e2e;
+      --color-border:       #e0e0e0;
+
+      /* ── Typography ───────────────────────────────────────────── */
+      /*
+        Body text: Vinila Test weight 300, ~17px, line-height 1.5
+        This confirms the weight-300 IS correct — Vinila at 300 looks
+        like normal weight text in renders (clean geometric sans-serif).
+        H2 headings: very large and bold (Vinila Test 700-800).
+        Using Inter here as preview fallback. WP renders with Vinila Test.
+      */
+      --font: 'Inter', system-ui, sans-serif;
+
+      /* Match Elementor typography scale (2rem ≈ 17-18px at WP base) */
+      --fz-h1:    36px;   /* large bold title */
+      --fz-h2:    30px;   /* H2 is deliberately BIG per DevTools screenshot */
+      --fz-h3:    15px;
+      --fz-body:  15px;   /* 2rem at ~8px base ≈ 16px */
+      --fz-sm:    13px;
+      --fz-xs:    11px;
+
+      --fw-body:  300;    /* confirmed — Vinila Test weight 300 for body */
+      --fw-head:  800;    /* H2 headings are heavy */
+
+      --radius: 8px;
+    }
+
+    /* ─── PREVIEW CHROME ────────────────────────────────────────── */
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: #EDECEC;   /* outer page chrome */
+      color: var(--color-text);
+      font-size: var(--fz-body);
+      font-weight: var(--fw-body);
+      line-height: 1.6;
+    }
+
+    .preview-bar {
+      background: var(--color-primary);
+      color: rgba(255,255,255,0.55);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .preview-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-orange); }
+
+    .wp-page-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 270px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 20px;
+      gap: 36px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) { .wp-page-wrapper { grid-template-columns: 1fr; } }
+
+    .wp-sidebar {
+      background: var(--color-white);
+      border: 2px dashed #ccc;
+      border-radius: var(--radius);
+      padding: 18px;
+      font-size: 12px;
+      color: #aaa;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .wp-sidebar-note {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: #bbb; margin-bottom: 10px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       CONTENT STYLES
+       Add these in WordPress → Elementor → Site Settings → Custom CSS
+       ═══════════════════════════════════════════════════════════ */
+
+    .pe-article-body {
+      background: var(--color-bg);   /* #fff — confirmed from reset.css */
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      font-family: var(--font);
+      font-size: var(--fz-body);
+      font-weight: var(--fw-body);   /* 300 — confirmed from DevTools */
+      line-height: 1.6;
+      color: var(--color-text);
+    }
+
+    /* Hero image block */
+    .pe-hero {
+      position: relative;
+      background: var(--color-green);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: -32px -36px 32px;
+      min-height: 300px;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .pe-hero img {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0.5;
+    }
+
+    .pe-hero-ph {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 6px;
+      opacity: 0.25;
+      color: white;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .pe-hero-ph-icon { font-size: 48px; }
+
+    .pe-hero-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(33,72,75,0.95) 0%, rgba(33,72,75,0.3) 65%, transparent 100%);
+    }
+
+    .pe-hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 28px 32px;
+      width: 100%;
+    }
+
+    .pe-hero-badge {
+      display: inline-block;
+      background: var(--color-orange);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+      font-family: var(--font-body);
+    }
+
+    .pe-hero-title {
+      font-family: var(--font);
+      font-size: clamp(22px, 3vw, var(--fz-h1));
+      font-weight: 800;
+      color: var(--color-white);
+      line-height: 1.15;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    .pe-hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.7);
+      flex-wrap: wrap;
+    }
+
+    .pe-hero-meta .av {
+      width: 24px; height: 24px;
+      background: var(--color-orange);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: white;
+      flex-shrink: 0;
+    }
+
+    /* H2 — confirmed large and heavy from DevTools screenshot */
+    .pe-article-body h2 {
+      font-family: var(--font);
+      font-size: var(--fz-h2);        /* 30px — big, matches rendered screenshot */
+      font-weight: var(--fw-head);    /* 800 */
+      color: var(--color-primary);
+      margin: 36px 0 14px;
+      line-height: 1.15;
+    }
+
+    .pe-article-body h3 {
+      font-size: var(--fz-h3);
+      font-weight: 700;
+      color: var(--color-primary);
+      margin: 18px 0 7px;
+    }
+
+    .pe-article-body p {
+      font-size: var(--fz-body);
+      line-height: 1.7;
+      color: var(--color-text);
+      margin-bottom: 14px;
+      font-weight: var(--fw-body);
+    }
+
+    /* strong is bolded relative to 300 base, so 600 is the right jump */
+    .pe-article-body strong { font-weight: 600; color: var(--color-secondary); }
+
+    .pe-article-body ul,
+    .pe-article-body ol {
+      margin: 8px 0 16px 20px;
+      color: var(--color-text);
+      font-size: var(--fz-body);
+      font-weight: var(--fw-body);
+    }
+
+    .pe-article-body li { margin-bottom: 6px; line-height: 1.65; }
+
+    /* Links are TEAL — confirmed from DevTools */
+    .pe-article-body a { color: var(--color-teal); text-decoration: none; }
+    .pe-article-body a:hover { text-decoration: underline; }
+
+    /* Intro callout */
+    .pe-intro {
+      background: var(--color-green-light);
+      border-left: 4px solid var(--color-green);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 13px 16px;
+      font-size: var(--fz-body);
+      font-weight: var(--fw-body);
+      color: var(--color-secondary);
+      margin-bottom: 22px;
+      line-height: 1.65;
+    }
+
+    /* TOC — dark green card with lime title, confirmed from DevTools screenshot */
+    .pe-toc {
+      background: var(--color-green);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+
+    .pe-toc-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-lime);      /* lime title — confirmed in screenshot */
+      margin-bottom: 12px;
+      letter-spacing: 0.3px;
+    }
+
+    .pe-toc-list {
+      list-style: none;
+      padding: 0; margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .pe-toc-list li {
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+      line-height: 1.4;
+    }
+
+    .pe-toc-list li a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .pe-toc-list li a:hover {
+      color: var(--color-lime);
+      text-decoration: none;
+    }
+
+    .pe-toc-list li .toc-num {
+      color: var(--color-lime);      /* lime numbers */
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    /* Step blocks — lime number circles */
+    .pe-step {
+      display: flex;
+      gap: 16px;
+      margin: 18px 0;
+      align-items: flex-start;
+    }
+
+    .pe-step-num {
+      width: 34px; height: 34px;
+      background: var(--color-lime);   /* lime green circle */
+      color: var(--color-primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .pe-step-body h3 { margin-top: 3px; margin-bottom: 6px; }
+    .pe-step-body p  { margin-bottom: 8px; }
+
+    /* Image blocks */
+    .pe-img {
+      margin: 24px 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+    }
+
+    .pe-img img { width: 100%; display: block; }
+
+    .pe-img-ph {
+      height: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--color-bg);
+      color: #bbb;
+      font-size: 13px;
+    }
+
+    .pe-img-ph-icon { font-size: 32px; opacity: 0.5; }
+
+    .pe-img-ph-tag {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: var(--color-border);
+      color: #aaa;
+      padding: 3px 9px;
+      border-radius: 3px;
+    }
+
+    .pe-img-cap {
+      padding: 9px 14px;
+      font-size: 12px;
+      color: var(--color-text);
+      background: var(--color-bg);
+      border-top: 1px solid var(--color-border);
+      font-style: italic;
+    }
+
+    /* Data table */
+    .pe-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 16px 0 24px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+
+    .pe-table th {
+      background: var(--color-green);
+      color: white;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    .pe-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text);
+      font-weight: var(--fw-body);
+    }
+
+    .pe-table td:first-child {
+      background: var(--color-bg);
+      color: var(--color-secondary);
+      font-size: 13px;
+      width: 40%;
+    }
+
+    .pe-table td:last-child {
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    .pe-table tr:last-child td { border-bottom: none; }
+
+    /* Tip callout — lime accent (on-brand) */
+    .pe-tip {
+      background: var(--color-lime-light);
+      border-left: 4px solid var(--color-lime);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 13px 16px;
+      font-size: var(--fz-body);
+      color: var(--color-text);
+      margin: 18px 0;
+      line-height: 1.65;
+    }
+
+    .pe-tip strong { color: var(--color-primary); font-weight: 700; }
+
+    /* Warning callout — orange accent */
+    .pe-warn {
+      background: #fdf2ef;
+      border-left: 4px solid var(--color-orange);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 13px 16px;
+      font-size: var(--fz-body);
+      color: var(--color-text);
+      margin: 18px 0;
+      line-height: 1.65;
+    }
+
+    .pe-warn strong { color: var(--color-primary); font-weight: 700; }
+
+    /* CTA banner */
+    .pe-cta-banner {
+      background: var(--color-green);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin: 32px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .pe-cta-text {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .pe-cta-text span {
+      display: block;
+      font-size: 12px;
+      font-weight: 300;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    /* Orange pill buttons — ALL CAPS confirmed from "SHOP ENGAGE X2" in screenshot */
+    .pe-btn-shop {
+      background: var(--color-orange);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 11px 24px;
+      border-radius: 30px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .pe-btn-shop:hover { background: var(--color-orange-hover); color: white; text-decoration: none; }
+
+    .pe-btn-readmore {
+      display: inline-block;
+      background: var(--color-orange);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 9px 22px;
+      border-radius: 30px;
+      margin: 6px 0 18px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .pe-btn-readmore:hover { background: var(--color-orange-hover); color: white; text-decoration: none; }
+
+    /* FAQ */
+    .pe-faq-item { border-bottom: 1px solid var(--color-border); }
+    .pe-faq-item:first-child { border-top: 1px solid var(--color-border); }
+
+    .pe-faq-btn {
+      width: 100%; background: none; border: none;
+      color: var(--color-primary);
+      font-family: var(--font);
+      font-size: var(--fz-body);
+      font-weight: 600;
+      text-align: left;
+      padding: 14px 0;
+      cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    }
+
+    .pe-faq-btn:hover { color: var(--color-green); }
+    .pe-faq-arrow { color: var(--color-green); transition: transform 0.25s; flex-shrink: 0; }
+    .pe-faq-item.open .pe-faq-arrow { transform: rotate(180deg); }
+    .pe-faq-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .pe-faq-item.open .pe-faq-body { max-height: 400px; }
+
+    .pe-faq-inner {
+      padding: 0 0 14px;
+      font-size: var(--fz-body);
+      color: var(--color-text);
+      line-height: 1.75;
+    }
+
+    /* Reviewer profile */
+    .pe-reviewer {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin: 28px 0;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+
+    .pe-reviewer-photo {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--color-green);
+      flex-shrink: 0; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: white;
+    }
+
+    .pe-reviewer-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+    .pe-reviewer-label { font-size: var(--fz-xs); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--color-text); margin-bottom: 3px; }
+    .pe-reviewer-name  { font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 2px; }
+    .pe-reviewer-title { font-size: 12px; color: var(--color-secondary); margin-bottom: 8px; }
+    .pe-reviewer-bio   { font-size: var(--fz-sm); color: var(--color-text); line-height: 1.6; }
+
+    /* Related posts */
+    .pe-related { margin-top: 36px; padding-top: 24px; border-top: 2px solid var(--color-border); }
+
+    .pe-related-heading {
+      font-size: var(--fz-h2);
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: 18px;
+    }
+
+    .pe-related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+    @media (max-width: 600px) { .pe-related-grid { grid-template-columns: 1fr; } }
+
+    .pe-related-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .pe-related-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
+
+    .pe-related-thumb { height: 110px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+    .pe-related-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .pe-related-body { padding: 11px 13px; }
+    .pe-related-tag { font-size: var(--fz-xs); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--color-orange); margin-bottom: 5px; }
+    .pe-related-title { font-size: var(--fz-sm); font-weight: 700; color: var(--color-primary); line-height: 1.4; margin-bottom: 6px; }
+    .pe-related-title a { color: var(--color-primary); }
+    .pe-related-title a:hover { color: var(--color-green); text-decoration: none; }
+    .pe-related-excerpt { font-size: 12px; color: var(--color-text); line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<!-- Preview bar (not part of the article) -->
+<div class="preview-bar">
+  <div class="dot"></div>
+  Content Preview — This is the article body only. WordPress theme wraps this automatically.
+</div>
+
+<!-- Fake two-column layout to simulate WordPress theme -->
+<div class="wp-page-wrapper">
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       CONTENT START — Everything below gets injected into WordPress
+       ═══════════════════════════════════════════════════════════════ -->
+
+  <article class="pe-article-body">
+
+    <!-- HERO — replace .pe-hero-ph with real <img> when image is ready -->
+    <div class="pe-hero">
+      <div class="pe-hero-ph">
+        <div class="pe-hero-ph-icon">🏓</div>
+        <div>Hero Image · 800 × 400px · WebP</div>
+      </div>
+      <div class="pe-hero-gradient"></div>
+      <div class="pe-hero-content">
+        <div class="pe-hero-badge">How-To Guide</div>
+        <h1 class="pe-hero-title">How to Add Weight to a Pickleball Paddle</h1>
+        <div class="pe-hero-meta">
+          <div class="av">B</div>
+          Braydon · Pickleball Effect
+          <span>·</span>
+          April 6, 2026
+        </div>
+      </div>
+    </div>
+
+    <div class="pe-intro">
+      Adding weight to a pickleball paddle changes how it plays — more power on drives, more stability on resets, less vibration on off-center hits. Tungsten tape is the most precise way to do it. This is exactly how I do it.
+    </div>
+
+    <p>
+      A lot of players buy a new paddle when they're actually just a few strips of tape away from fixing what bothers them. If your paddle feels too light, deflects too easily, or lacks punch on drives, adding weight is worth trying before spending $200 on a new one.
+    </p>
+
+    <p>
+      Tungsten tape is the standard for a reason — it's dense, it stays put, and you can remove it cleanly if you don't like the result. Here's the full process.
+    </p>
+
+    <!-- TOC — dark green card with lime title, matching actual site -->
+    <div class="pe-toc">
+      <div class="pe-toc-label">Table Of Contents</div>
+      <ol class="pe-toc-list">
+        <li><a href="#why-weight"><span class="toc-num">1.</span> Why Add Weight</a></li>
+        <li><a href="#materials"><span class="toc-num">2.</span> What You Need</a></li>
+        <li><a href="#placement"><span class="toc-num">3.</span> Placement Guide</a></li>
+        <li><a href="#steps"><span class="toc-num">4.</span> Step-by-Step</a></li>
+        <li><a href="#tips"><span class="toc-num">5.</span> Tips &amp; Mistakes</a></li>
+        <li><a href="#faq"><span class="toc-num">6.</span> FAQ</a></li>
+      </ol>
+    </div>
+
+    <!-- SECTION 1 -->
+    <h2 id="why-weight">Why Add Weight to a Pickleball Paddle?</h2>
+
+    <p>
+      Weight affects three things: power, stability, and maneuverability. More weight means more mass behind the ball on drives, more resistance to twisting on off-center hits, and more dampening of vibration. Less weight means faster hand speed, easier resets, and better maneuverability at the kitchen.
+    </p>
+
+    <p>
+      The tradeoff is real — but most players who complain about a paddle feeling "floaty" or "unstable" are under-weighted, not over-weighted. The default weight range on most paddles (7.6–8.2 oz) is conservative. A lot of intermediate and advanced players end up in the 8.3–8.8 oz range after tuning.
+    </p>
+
+    <table class="pe-table">
+      <thead>
+        <tr><th>Where You Add Weight</th><th>What It Changes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>12 o'clock (top edge)</td><td>More power &amp; swing weight. Slower hands, harder drives.</td></tr>
+        <tr><td>3 &amp; 9 o'clock (side edges)</td><td>More stability, wider sweet spot. Less twisting on off-center hits.</td></tr>
+        <tr><td>Handle / butt cap</td><td>More swing weight from the back. Power without changing balance point.</td></tr>
+        <tr><td>Throat / lower face</td><td>Adds weight without changing balance, minimal impact on feel.</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      <strong>The most common setup:</strong> 1 strip at 3 o'clock, 1 strip at 9 o'clock. Adds ~2–4 grams, widens the sweet spot, improves reset stability. Good starting point for almost any player.
+    </p>
+
+    <!-- IMAGE -->
+    <div class="pe-img">
+      <div class="pe-img-ph">
+        <div class="pe-img-ph-icon">📍</div>
+        <div>Diagram — paddle clock positions (12, 3, 9 o'clock marked)</div>
+        <div class="pe-img-ph-tag">type: diagram · generated with Pillow or illustrated</div>
+      </div>
+      <div class="pe-img-cap">The four main tape placement zones — each changes the feel in a different way. Most players start at 3 and 9.</div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <h2 id="materials">What You Need</h2>
+
+    <p>Not much. You need tape, scissors, and clean hands. That's it.</p>
+
+    <ul>
+      <li><strong>Tungsten tape</strong> — denser than lead tape, no health concerns, easier to cut cleanly. PE Tungsten Tape strips are pre-cut for pickleball paddles.</li>
+      <li><strong>Scissors or a craft knife</strong> — for custom lengths. Pre-cut strips skip this.</li>
+      <li><strong>A scale (optional but useful)</strong> — knowing your before/after weight helps you dial in future adjustments. Any kitchen scale down to 0.1g works.</li>
+      <li><strong>Isopropyl alcohol &amp; a cloth</strong> — clean the paddle surface first. Tape sticks better and peels cleaner later.</li>
+    </ul>
+
+    <div class="pe-tip">
+      <strong>Tip:</strong> Weigh your paddle before you start. Note the static weight and, if you have a swing weight tool, the swing weight. That baseline makes it much easier to evaluate whether the change actually helped.
+    </div>
+
+    <!-- PRODUCT CTA -->
+    <div class="pe-cta-banner">
+      <div class="pe-cta-text">
+        PE Tungsten Tape — Pre-cut strips for pickleball paddles
+        <span>Available in singles and 10-packs · pickleballeffectshop.com</span>
+      </div>
+      <a href="https://pickleballeffectshop.com" class="pe-btn-shop">SHOP NOW</a>
+    </div>
+
+    <!-- SECTION 3 -->
+    <h2 id="placement">Placement Guide</h2>
+
+    <h3>3 &amp; 9 o'clock — The Universal Starting Point</h3>
+    <p>
+      One strip on each side edge, centered at the widest part of the paddle. This adds stability without meaningfully changing your swing weight or balance. If you've never tuned a paddle before, start here. Most players find this alone is enough.
+    </p>
+
+    <h3>12 o'clock — More Power, Less Speed</h3>
+    <p>
+      A strip across the top edge shifts the balance point toward the head and increases swing weight. You'll feel more mass behind drives and overheads. Hand speed at the kitchen will drop slightly. Best for players who already have fast hands and want more punch on power shots.
+    </p>
+
+    <h3>Handle / Butt Cap</h3>
+    <p>
+      Adding weight inside the handle or under the overgrip at the butt increases swing weight without shifting the balance point forward. The paddle will feel heavier overall but head-neutral. Some players prefer this for maintaining maneuverability while still gaining mass.
+    </p>
+
+    <!-- IMAGE -->
+    <div class="pe-img">
+      <div class="pe-img-ph">
+        <div class="pe-img-ph-icon">🏓</div>
+        <div>Product Photo — tungsten tape applied to paddle edge</div>
+        <div class="pe-img-ph-tag">type: product · Braydon's photography · 800 × 480px</div>
+      </div>
+      <div class="pe-img-cap">One strip at 3 o'clock, one at 9 — the most common starting setup. Clean edges, no overhang.</div>
+    </div>
+
+    <div class="pe-warn">
+      <strong>Avoid the face of the paddle.</strong> Tape on the hitting surface affects ball contact, disrupts spin generation, and may violate USAPA tournament rules. Keep tape to edges and the handle only.
+    </div>
+
+    <!-- SECTION 4 -->
+    <h2 id="steps">Step-by-Step: How to Apply Tungsten Tape</h2>
+
+    <div class="pe-step">
+      <div class="pe-step-num">1</div>
+      <div class="pe-step-body">
+        <h3>Clean the surface</h3>
+        <p>Wipe the edge where you'll place the tape with isopropyl alcohol. Let it dry completely — 30 seconds is enough. Any oil or residue from handling will reduce adhesion and cause peeling later.</p>
+      </div>
+    </div>
+
+    <div class="pe-step">
+      <div class="pe-step-num">2</div>
+      <div class="pe-step-body">
+        <h3>Weigh your paddle (optional)</h3>
+        <p>Put it on a scale and note the static weight. If you have a swing weight tool, record that too. This gives you a before/after comparison and helps you dial future adjustments.</p>
+      </div>
+    </div>
+
+    <div class="pe-step">
+      <div class="pe-step-num">3</div>
+      <div class="pe-step-body">
+        <h3>Cut or size your strips</h3>
+        <p>For 3 and 9 o'clock placement, a strip roughly 2–3 inches is standard. Pre-cut strips from PE are sized for this. If cutting your own, use sharp scissors for a clean edge — jagged cuts peel faster.</p>
+      </div>
+    </div>
+
+    <div class="pe-step">
+      <div class="pe-step-num">4</div>
+      <div class="pe-step-body">
+        <h3>Apply the tape</h3>
+        <p>Peel the backing and press the strip firmly onto the edge, centered at the position you've chosen. Press along the full length — work from the middle outward to avoid air bubbles. For edge placement, wrap slightly over both sides of the edge for better adhesion.</p>
+      </div>
+    </div>
+
+    <div class="pe-step">
+      <div class="pe-step-num">5</div>
+      <div class="pe-step-body">
+        <h3>Press and smooth</h3>
+        <p>Use your thumbnail or the back of a pen to press the tape down firmly. Pay attention to the edges of the strip — those are where peeling starts. Press for 10–15 seconds on each strip.</p>
+      </div>
+    </div>
+
+    <div class="pe-step">
+      <div class="pe-step-num">6</div>
+      <div class="pe-step-body">
+        <h3>Test and adjust</h3>
+        <p>Play with it. Give it a full session before making changes — your hands need time to adapt. If it feels too heavy, peel one strip. If you want more, add another. The process is reversible; don't overthink the first application.</p>
+      </div>
+    </div>
+
+    <!-- IMAGE -->
+    <div class="pe-img">
+      <div class="pe-img-ph">
+        <div class="pe-img-ph-icon">✋</div>
+        <div>Action Photo — hands pressing tape onto paddle edge</div>
+        <div class="pe-img-ph-tag">type: how-to action · Braydon's photography or staged close-up</div>
+      </div>
+      <div class="pe-img-cap">Press along the full strip from center outward — this prevents air bubbles and keeps the edges from peeling.</div>
+    </div>
+
+    <a href="https://pickleballeffectshop.com" class="pe-btn-readmore">Get Tungsten Tape →</a>
+
+    <!-- SECTION 5 -->
+    <h2 id="tips">Tips &amp; Common Mistakes</h2>
+
+    <h3>Start lighter than you think</h3>
+    <p>
+      Two strips at 3 and 9 feels like nothing in your hand before you play. On court it's noticeable. Most players overshoot on their first attempt — add one strip, play a session, then decide if you want more.
+    </p>
+
+    <h3>Don't layer tape over old tape</h3>
+    <p>
+      Peeling and re-applying is better than stacking. Layered tape creates uneven weight distribution and the bottom layer will pull the top layer off eventually. Clean application every time.
+    </p>
+
+    <h3>Use edge guard tape on top of tungsten tape</h3>
+    <p>
+      If you play on outdoor courts or hit the ground occasionally, a layer of <a href="https://pickleballeffectshop.com">PE Edge Guard Tape</a> over the tungsten tape protects the strips and extends their life. The tungsten tape stays put and the edge guard takes the impact.
+    </p>
+
+    <div class="pe-tip">
+      <strong>The sweet spot test:</strong> After adding weight, deliberately hit 10 balls slightly off-center — above and below your normal contact point, left and right. A properly weighted paddle at 3 and 9 should show clearly improved consistency on the off-center hits compared to before.
+    </div>
+
+    <h3>Swing weight vs. static weight — know the difference</h3>
+    <p>
+      Static weight is what a scale reads. Swing weight is how heavy the paddle feels in motion — determined by where the weight is distributed, not just how much there is. Two paddles at 8.2 oz can swing completely differently. Adding weight at 12 o'clock increases swing weight significantly; adding the same weight to the handle barely changes it. Know what you're trying to change.
+    </p>
+
+    <!-- FAQ -->
+    <h2 id="faq">Frequently Asked Questions</h2>
+
+    <div>
+
+      <div class="pe-faq-item">
+        <button class="pe-faq-btn" onclick="toggleFaq(this)">
+          How much does tungsten tape weigh?
+          <span class="pe-faq-arrow">▾</span>
+        </button>
+        <div class="pe-faq-body">
+          <div class="pe-faq-inner">
+            One 2-inch strip of PE Tungsten Tape adds approximately 2–3 grams. A full setup (two strips at 3 and 9) adds roughly 4–6 grams — about 0.15–0.2 oz. Meaningful on court, invisible in your hand before you play.
+          </div>
+        </div>
+      </div>
+
+      <div class="pe-faq-item">
+        <button class="pe-faq-btn" onclick="toggleFaq(this)">
+          Will tungsten tape affect my swing weight?
+          <span class="pe-faq-arrow">▾</span>
+        </button>
+        <div class="pe-faq-body">
+          <div class="pe-faq-inner">
+            Yes, but the amount depends on placement. Tape at 12 o'clock has the highest swing weight impact — weight far from the pivot point (your grip) creates more rotational inertia. Tape at 3 and 9 has moderate impact. Tape on the handle has minimal swing weight impact because it's close to the pivot.
+          </div>
+        </div>
+      </div>
+
+      <div class="pe-faq-item">
+        <button class="pe-faq-btn" onclick="toggleFaq(this)">
+          Is tungsten tape legal for tournament play?
+          <span class="pe-faq-arrow">▾</span>
+        </button>
+        <div class="pe-faq-body">
+          <div class="pe-faq-inner">
+            Yes — as long as it's applied to the edge or handle, not the hitting surface. USAPA rules allow alterations that don't affect the deflection properties of the face. Edge weight is explicitly permitted. Check your specific tournament rules if you're competing at a high level.
+          </div>
+        </div>
+      </div>
+
+      <div class="pe-faq-item">
+        <button class="pe-faq-btn" onclick="toggleFaq(this)">
+          Can I remove tungsten tape without damaging the paddle?
+          <span class="pe-faq-arrow">▾</span>
+        </button>
+        <div class="pe-faq-body">
+          <div class="pe-faq-inner">
+            Yes. Peel it back slowly at a low angle — pulling straight up will leave more residue than peeling parallel to the surface. Any adhesive residue comes off cleanly with isopropyl alcohol and a cloth. The edge guard coating should be unaffected.
+          </div>
+        </div>
+      </div>
+
+      <div class="pe-faq-item">
+        <button class="pe-faq-btn" onclick="toggleFaq(this)">
+          How is tungsten tape different from lead tape?
+          <span class="pe-faq-arrow">▾</span>
+        </button>
+        <div class="pe-faq-body">
+          <div class="pe-faq-inner">
+            Tungsten is denser than lead — same weight effect in a thinner, smaller strip. It's also non-toxic, which matters for handling and disposal. Lead tape still exists (particularly in golf and tennis) but tungsten is the better choice for pickleball: cleaner cut, lower profile, no health concerns.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Final CTA -->
+    <div class="pe-cta-banner">
+      <div class="pe-cta-text">
+        Ready to tune your setup? Start with PE Tungsten Tape.
+        <span>Pre-cut strips · free shipping on orders over $30 · pickleballeffectshop.com</span>
+      </div>
+      <a href="https://pickleballeffectshop.com" class="pe-btn-shop">SHOP NOW</a>
+    </div>
+
+    <!-- Reviewer Profile -->
+    <div class="pe-reviewer">
+      <div class="pe-reviewer-photo">B</div>
+      <div>
+        <div class="pe-reviewer-label">Written By</div>
+        <div class="pe-reviewer-name">Braydon Donovan</div>
+        <div class="pe-reviewer-title">Founder, Pickleball Effect — Independent Equipment Reviewer</div>
+        <div class="pe-reviewer-bio">
+          Braydon has reviewed 200+ paddles using in-house measurement tools — twistweight, swingweight, and spin RPM tested on every paddle. No brand relationships, no paid placements. Tuning lab content is based on real setups tested on real paddles.
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Posts -->
+    <div class="pe-related">
+      <div class="pe-related-heading">Related Posts</div>
+      <div class="pe-related-grid">
+
+        <div class="pe-related-card">
+          <div class="pe-related-thumb" style="background:var(--green);">🏓</div>
+          <div class="pe-related-body">
+            <div class="pe-related-tag">Guide</div>
+            <div class="pe-related-title"><a href="#">How to Choose Pickleball Paddle Weight</a></div>
+            <div class="pe-related-excerpt">The full breakdown on how static weight, swing weight, and balance point affect your game.</div>
+          </div>
+        </div>
+
+        <div class="pe-related-card">
+          <div class="pe-related-thumb" style="background:#3a1a40;">⚙️</div>
+          <div class="pe-related-body">
+            <div class="pe-related-tag">Guide</div>
+            <div class="pe-related-title"><a href="#">How to Apply Edge Guard Tape</a></div>
+            <div class="pe-related-excerpt">Protect your paddle edges and extend the life of your tungsten tape in the process.</div>
+          </div>
+        </div>
+
+        <div class="pe-related-card">
+          <div class="pe-related-thumb" style="background:#1a2a5a;">🔬</div>
+          <div class="pe-related-body">
+            <div class="pe-related-tag">Deep Dive</div>
+            <div class="pe-related-title"><a href="#">Swing Weight vs. Static Weight Explained</a></div>
+            <div class="pe-related-excerpt">Why two paddles at the same weight can feel completely different — and what actually matters.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </article>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       CONTENT END
+       ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- Fake sidebar — WordPress theme provides this, we don't control it -->
+  <aside class="wp-sidebar">
+    <div class="wp-sidebar-note">Sidebar</div>
+    <p style="font-size:12px; line-height:1.6;">
+      This area comes from your WordPress theme automatically.<br/><br/>
+      We don't inject this — Elementor handles it.<br/><br/>
+      To match the look: configure sidebar widgets in <strong>Appearance → Widgets</strong> in your WordPress dashboard.
+    </p>
+  </aside>
+
+</div>
+
+<script>
+  function toggleFaq(btn) {
+    const item = btn.closest('.pe-faq-item');
+    const open = item.classList.contains('open');
+    document.querySelectorAll('.pe-faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!open) item.classList.add('open');
+  }
+</script>
+
+</body>
+</html>

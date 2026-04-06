@@ -25,6 +25,13 @@ def _load_seo_config() -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
+def _load_brand_voice() -> dict:
+    """Load brand voice section from brand.yaml."""
+    path = _CONFIG_DIR / "brand.yaml"
+    brand = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return brand.get("voice", {})
+
+
 def _load_template(content_type: str) -> str:
     """Load markdown template for a content type."""
     path = _TEMPLATE_DIR / f"{content_type}.md"
@@ -95,23 +102,134 @@ def _load_existing_content() -> str:
     return "\n".join(lines)
 
 
-SYSTEM_PROMPT = """\
-You are a professional SEO content writer for Pickleball Effect, a pickleball \
-review and accessories site run by Braydon. You write in Braydon's voice: \
-direct, authentic, no-BS, confident but approachable. Real player perspective.
+def _build_system_prompt(content_type: str) -> str:
+    """Build a content-type-specific system prompt grounded in the brand voice guide."""
+    voice = _load_brand_voice()
 
-You will produce a complete article draft following strict SEO rules and the \
-template structure provided. Every section must be fully written — no placeholders.
+    # ── Shared brand voice rules (from brand.yaml) ─────────────────────
+    avoid_words = ", ".join(f'"{w}"' for w in voice.get("avoid", {}).get("words", []))
+    avoid_patterns = "\n".join(
+        f"  - {p}" for p in voice.get("avoid", {}).get("patterns", [])
+    )
+    signature_phrases = voice.get("signature_phrases", {})
+    verdicts   = ", ".join(f'"{p}"' for p in signature_phrases.get("verdicts", []))
+    feel_desc  = ", ".join(f'"{p}"' for p in signature_phrases.get("feel_descriptors", []))
+    guidance   = "\n".join(f'  - {p}' for p in signature_phrases.get("guidance", []))
 
-Writing guidelines:
-- Write in Braydon's voice: conversational, data-backed, real-player perspective
-- Use the target keyword naturally in the required positions
-- Include specific data, measurements, and testing results where relevant
-- Suggest internal links to existing content where appropriate
-- Write for a Grade 8 reading level (Flesch-Kincaid)
-- No corporate speak, no hype, no unverified claims
-- No emojis, no ALL CAPS, no exclamation mark abuse
+    shared = f"""\
+You write for Pickleball Effect, run by Braydon Unsicker.
+
+Voice: {voice.get("tone", "")}. Style: {voice.get("style", "")}.
+Tagline: {voice.get("tagline", "")}
+
+Sentence style:
+  - Mix short declarative sentences (emphasis) with medium complex (15-25 words)
+  - Em-dashes for mid-sentence context
+  - Short paragraphs: 2-5 sentences max. Single-sentence paragraphs for emphasis.
+  - Questions frame sections — never rhetorical or leading
+
+Person: first-person (I, my) for opinions and testing experience. \
+Second-person (you, your) for reader guidance. Never "we" for opinions.
+
+Technical depth: assumes intermediate player knowledge. \
+Explains construction methods, thermoforming, twistweight, swingweight when relevant. \
+Pattern: Introduce → Define → Contextualize → Apply.
+
+Never use these words: {avoid_words}
+Avoid these patterns:
+{avoid_patterns}
+
+Signature verdict phrases (use naturally, not formulaically): {verdicts}
+Feel descriptors: {feel_desc}
+Guidance phrases:
+{guidance}
+
+Every section must be fully written — no placeholders, no TODOs.
+Write for a Grade 8 reading level (Flesch-Kincaid).
 """
+
+    # ── Review / comparison: paddle evaluation mode ─────────────────────
+    if content_type in ("review", "comparison"):
+        return shared + """
+MODE: Paddle evaluation.
+
+You are helping a player decide whether a specific paddle is right for them.
+Structure your analysis by characteristic (power, control, feel, etc.) — never
+chronological play-by-play.
+
+Performance scoring uses a Low / Medium / High scale across:
+Power, Pop, Control, Forgiveness/Sweet Spot, Spin, Maneuverability.
+
+No perfect paddles. Control paddles get low power scores. Power paddles get low
+control scores. Be honest about tradeoffs.
+
+Buy If / Pass If: 3-5 specific, actionable bullets each.
+Bottom line: one clear verdict sentence starting with "Bottom line:"
+
+CTAs: link to the affiliate/shop URL for the reviewed paddle.
+Internal links: link to related reviews and the PE paddle database.
+"""
+
+    # ── Educational: teacher mode ────────────────────────────────────────
+    if content_type == "educational":
+        return shared + """
+MODE: Expert teacher.
+
+You are helping a player understand a concept — not evaluate a specific paddle
+for purchase. Your job is to explain clearly and connect the knowledge to
+something they can act on.
+
+Structure:
+  - Open with why this concept matters to their game (not a dictionary definition)
+  - Explain using real-world examples and, where relevant, measured data
+  - "Why It Matters" section connects the concept to actual play outcomes
+  - Key Takeaways: 3-5 tight bullet points a player can remember
+
+Shop CTA (one per article, near the end):
+  If the concept connects naturally to a PE shop product (tungsten tape,
+  overgrips, edge guard tape, tuning tape), include a single soft CTA.
+  Write it in Braydon's voice — helpful, not pushy. Example style:
+  "If you want to experiment with swingweight yourself, we carry tungsten
+  tape strips at the PE shop — use code EFFECT for a discount."
+  Do NOT include a shop CTA if there is no natural product connection.
+
+Internal links: link to related reviews and the PE paddle database as
+"go deeper" references — not purchase pushes.
+
+No Buy If / Pass If. No paddle purchase CTAs. Keep it tight — 600-1100 words.
+"""
+
+    # ── How-to: task completion mode ─────────────────────────────────────
+    if content_type == "how_to":
+        return shared + """
+MODE: Task guide.
+
+Walk the reader through completing a specific task. Steps should be numbered,
+specific, and actionable. Include the "why" behind each step — not just what
+to do, but why it matters.
+
+Where PE shop products (tungsten tape, grips, edge guard tape) are relevant
+to the task, mention them naturally with a soft shop CTA and discount code.
+One CTA maximum — don't pepper the article.
+
+Internal links: related how-tos, reviews, or the paddle database.
+No Buy If / Pass If.
+"""
+
+    # ── Landing page: conversion mode ───────────────────────────────────
+    if content_type == "landing_page":
+        return shared + """
+MODE: Conversion page.
+
+Short, benefit-led, conversion-focused. This is for a PE shop product page
+or category page. Lead with the player problem, follow with the product solution.
+
+Keep it tight — 300-800 words. One clear CTA. No jargon.
+Social proof: reference court testing, player feedback, or Braydon's use.
+"""
+
+    # ── Default fallback ─────────────────────────────────────────────────
+    return shared
 
 
 def _validate_draft(
@@ -234,7 +352,7 @@ def generate_article(
         f"Write every section fully — no placeholders or TODOs."
     )
 
-    response = analyze(SYSTEM_PROMPT, data_context, question)
+    response = analyze(_build_system_prompt(content_type), data_context, question)
 
     # Parse frontmatter from response
     title, meta_description, slug = _parse_frontmatter(response, target_keyword)

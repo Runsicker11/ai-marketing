@@ -21,7 +21,8 @@ create or optimize next.
 Your recommendations should:
 1. Prioritize by potential traffic impact (impressions x position improvement potential)
 2. Categorize each recommendation as: new_article | optimize_existing | update_meta
-3. Specify the content type: review | comparison | how_to | landing_page
+3. Specify the content type: review | comparison | how_to | landing_page | educational
+   (educational = concept explainer for informational queries; CTA points to PE shop accessories, not paddle affiliates)
 4. Include target keyword and suggested title
 5. Note any existing content that overlaps (to avoid cannibalization)
 

@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joola Hyperion CGS 16mm Review – Pickleball Effect</title>
+  <meta name="description" content="Hands-on review of the Joola Hyperion CGS 16mm. Real court testing, measured specs, and an honest take on who this paddle is actually built for." />
+
+  <!-- Google Fonts — matches the clean serif/sans-serif mix typical of review sites -->
+  <!-- Vinila Test / Vinila Condensed Test are installed in WordPress. DM Sans + Barlow Condensed used as preview fallbacks. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700;800&family=Barlow+Condensed:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── RESET ────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* ── Exact Elementor theme values ─────────────────────────── */
+      --color-primary:   #222825;   /* near-black dark green — headings */
+      --color-secondary: #54595F;   /* mid gray — secondary text */
+      --color-text:      #7A7A7A;   /* body text gray */
+      --color-accent:    #FFFFFF;   /* white */
+      --color-lime:      #D6E28B;   /* yellow-green highlight */
+      --color-teal:      #80BBBC;   /* seafoam secondary accent */
+      --color-green:     #21484B;   /* dark teal — nav, CTAs, borders */
+      --color-orange:    #D85E3C;   /* coral — buttons */
+      --color-bg:        #EDECEC;   /* warm light gray page background */
+
+      /* Derived */
+      --color-green-light:  #e4eeee;
+      --color-orange-hover: #be4e2e;
+      --color-border:       #d8d6d6;
+      --color-white:        #FFFFFF;
+
+      /* Typography — Vinila Test in WP, DM Sans / Barlow Condensed here as preview */
+      --font-body:       'DM Sans', sans-serif;
+      --font-condensed:  'Barlow Condensed', sans-serif;
+
+      --fz-h1:    48px;
+      --fz-h2:    24px;
+      --fz-body:  17px;
+      --fz-label: 12px;
+
+      --fw-h1:    800;
+      --fw-h2:    400;
+      --fw-body:  300;
+
+      --ls-h2:    2.5px;
+      --ls-label: 1.5px;
+
+      --radius: 6px;
+      --max-w:  1140px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body), sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    a { color: var(--color-green); text-decoration: none; }
+    a:hover { color: var(--color-teal); text-decoration: underline; }
+
+    img { display: block; max-width: 100%; height: auto; }
+
+    /* ─── TOP NAV ──────────────────────────────────────────────── */
+    .site-nav-bar {
+      background: var(--color-green);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--color-white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--color-green);
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 28px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .nav-links a { color: rgba(255,255,255,0.85); }
+    .nav-links a:hover { color: white; text-decoration: none; }
+
+    .nav-cta {
+      background: var(--color-orange);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: var(--radius);
+      letter-spacing: 0.3px;
+    }
+
+    .nav-cta:hover { background: var(--color-orange-hover); color: white; text-decoration: none; }
+
+    /* ─── PAGE WRAPPER ─────────────────────────────────────────── */
+    .page-wrap {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    /* ─── TWO-COLUMN LAYOUT ────────────────────────────────────── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 40px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .content-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── HERO IMAGE BLOCK ─────────────────────────────────────── */
+    /*
+      IMAGE STRATEGY — Hero:
+      ─────────────────────────────────────────────────────────────
+      This composite image (seen in screenshot) consists of:
+        1. A paddle product photo (transparent / cut-out PNG)
+        2. A dark green gradient background
+        3. PE logo top-left, product name overlaid bottom-left
+
+      How to produce this for each review:
+        Option A (Current best): Build it with the code below using a
+          PNG paddle image on the green background. The code auto-adds
+          the branding overlay. Just swap in the paddle image.
+        Option B (Automated): Use Pillow (Python) to composite
+          paddle PNG on a green gradient with text overlay for each review.
+        Option C (AI-generated): Nano Banana / DALL-E 3 can generate
+          stylized paddle illustrations with the PE color palette.
+          Consistent quality requires a good system prompt.
+        Option D (Manufacturer): Most brands provide hi-res PNGs
+          with transparent bg. Email media@[brand].com.
+
+      Recommended for now: Option A manually, Option B when automating.
+      All images: 800 × 480px min · WebP format.
+      Alt text: "[Paddle Name] pickleball paddle review – Pickleball Effect"
+    */
+    .hero-block {
+      position: relative;
+      background: var(--color-green);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-block img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      opacity: 0.55;
+      position: absolute;
+      inset: 0;
+    }
+
+    /* Placeholder state (when no image is set) */
+    .hero-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      opacity: 0.25;
+      color: white;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .hero-placeholder-icon { font-size: 56px; }
+
+    .hero-content-overlay {
+      position: relative;
+      z-index: 2;
+      padding: 32px 36px;
+      width: 100%;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--color-orange);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 3px;
+      margin-bottom: 12px;
+    }
+
+    .hero-title {
+      font-family: var(--font-condensed);
+      font-size: clamp(22px, 3.5vw, 34px);
+      font-weight: 700;
+      color: white;
+      line-height: 1.2;
+      margin-bottom: 14px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .hero-byline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .hero-byline .avatar {
+      width: 26px; height: 26px;
+      background: var(--color-orange);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .hero-byline .sep { opacity: 0.4; }
+
+    /* ─── ARTICLE META ──────────────────────────────────────────── */
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--color-secondary);
+      padding: 0 0 20px;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 24px;
+    }
+
+    /* ─── TABLE OF CONTENTS — tab style ─────────────────────────── */
+    .toc-pills {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 28px;
+    }
+
+    .toc-pills-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--color-text);
+      margin-bottom: 12px;
+    }
+
+    .toc-pills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .toc-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1.5px solid var(--color-green);
+      color: var(--color-green);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+
+    .toc-pill:hover {
+      background: var(--color-green);
+      color: white;
+      text-decoration: none;
+    }
+
+    .toc-pill .num {
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    /* ─── ARTICLE HEADINGS ─────────────────────────────────────── */
+    .article-body h2 {
+      font-family: var(--font-condensed);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--color-green);
+      display: inline-block;
+    }
+
+    /* full-width line under h2 */
+    .article-body h2::after {
+      content: '';
+      display: block;
+      width: 100%;
+    }
+
+    /* force h2 to be block so border stretches to full column */
+    .article-body h2 { display: block; }
+
+    .article-body h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin: 24px 0 10px;
+    }
+
+    /* ─── ARTICLE BODY TEXT ────────────────────────────────────── */
+    .article-body p {
+      font-size: 15.5px;
+      line-height: 1.8;
+      color: var(--color-text);
+      margin-bottom: 18px;
+    }
+
+    .article-body strong { font-weight: 700; }
+
+    .article-body ul, .article-body ol {
+      margin: 10px 0 20px 22px;
+      color: var(--color-text);
+      font-size: 15px;
+    }
+
+    .article-body li { margin-bottom: 7px; line-height: 1.7; }
+
+    /* ─── INTRO PULLOUT ────────────────────────────────────────── */
+    .intro-callout {
+      background: var(--color-green-light);
+      border-left: 4px solid var(--color-green);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 16px 20px;
+      font-size: 15px;
+      color: var(--color-text);
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+
+    /* ─── IMAGE BLOCKS ─────────────────────────────────────────── */
+    /*
+      IMAGE STRATEGY — Inline:
+      ─────────────────────────────────────────────────────────────
+      Type "product"   → Manufacturer PNG on white/neutral bg.
+                         Alt: "[paddle] face detail / edge guard / [feature]"
+      Type "action"    → On-court photo. Braydon's photography is best.
+                         Fallback: Unsplash API (query: pickleball play)
+                         Unsplash free tier: 50 req/hour, requires attribution.
+      Type "diagram"   → Infographic or feel-map.
+                         Option: generate with Pillow or DALL-E.
+      Type "lifestyle" → Player holding paddle, court background.
+                         Best: manufacturer press kit or Braydon's content.
+
+      All: 800 × 480px min · WebP · descriptive alt text · lazy load.
+    */
+    .img-block {
+      margin: 28px 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      background: white;
+    }
+
+    .img-block img { width: 100%; display: block; }
+
+    .img-placeholder {
+      height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #bbb;
+      background: #f4f4f0;
+    }
+
+    .img-placeholder-icon { font-size: 36px; opacity: 0.5; }
+
+    .img-placeholder-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: var(--color-border);
+      color: #999;
+      padding: 3px 10px;
+      border-radius: 3px;
+    }
+
+    .img-caption {
+      padding: 9px 14px;
+      font-size: 12px;
+      color: var(--color-secondary);
+      background: #f9f9f6;
+      border-top: 1px solid var(--color-border);
+      font-style: italic;
+    }
+
+    /* ─── SPECS TABLE ──────────────────────────────────────────── */
+    .specs-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 18px 0 28px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+
+    .specs-table th {
+      background: var(--color-green);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      text-align: left;
+    }
+
+    .specs-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .specs-table tr:last-child td { border-bottom: none; }
+
+    .specs-table td:first-child {
+      font-size: 13px;
+      color: var(--color-secondary);
+      width: 44%;
+      background: #fafaf8;
+    }
+
+    .specs-table td:last-child {
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    /* ─── PERFORMANCE SCORECARD ────────────────────────────────── */
+    .scorecard {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin: 18px 0 28px;
+    }
+
+    .scorecard-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--color-text);
+      margin-bottom: 18px;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .score-name {
+      width: 115px;
+      font-size: 13px;
+      color: var(--color-secondary);
+      flex-shrink: 0;
+    }
+
+    .score-track {
+      flex: 1;
+      height: 7px;
+      background: #e8e8e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--color-green);
+    }
+
+    .score-fill.mid  { background: #e8a020; }
+    .score-fill.low  { background: #cc3b3b; }
+
+    .score-num {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-primary);
+      width: 30px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ─── PROS / CONS ──────────────────────────────────────────── */
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 18px 0 28px;
+    }
+
+    @media (max-width: 600px) { .pros-cons { grid-template-columns: 1fr; } }
+
+    .pc-box {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+
+    .pc-box.pros { border-top: 3px solid var(--color-green); }
+    .pc-box.cons { border-top: 3px solid #cc3b3b; }
+
+    .pc-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .pc-box.pros .pc-label { color: var(--color-green); }
+    .pc-box.cons .pc-label { color: #cc3b3b; }
+
+    .pc-box ul { list-style: none; padding: 0; margin: 0; }
+
+    .pc-box li {
+      font-size: 14px;
+      color: var(--color-text);
+      margin-bottom: 9px;
+      padding-left: 18px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .pc-box.pros li::before { content: "✓"; position: absolute; left: 0; color: var(--color-green); font-weight: 700; }
+    .pc-box.cons li::before { content: "✗"; position: absolute; left: 0; color: #cc3b3b; font-weight: 700; }
+
+    /* ─── BUY IF / PASS IF ─────────────────────────────────────── */
+    .buy-pass {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 18px 0 28px;
+    }
+
+    @media (max-width: 600px) { .buy-pass { grid-template-columns: 1fr; } }
+
+    .bp-box {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+
+    .bp-box.buy  { border-left: 4px solid var(--color-green); }
+    .bp-box.pass { border-left: 4px solid #e8a020; }
+
+    .bp-label {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--color-primary);
+    }
+
+    .bp-box.buy  .bp-label { color: var(--color-green); }
+    .bp-box.pass .bp-label { color: #b87a00; }
+
+    .bp-box ul { list-style: none; padding: 0; margin: 0; }
+
+    .bp-box li {
+      font-size: 14px;
+      color: var(--color-text);
+      margin-bottom: 9px;
+      padding-left: 14px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .bp-box li::before { content: "—"; position: absolute; left: 0; color: #bbb; }
+
+    /* ─── COMPARISON TABLE ─────────────────────────────────────── */
+    .compare-wrap {
+      overflow-x: auto;
+      margin: 18px 0 28px;
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      min-width: 520px;
+    }
+
+    .compare-table th {
+      background: var(--color-green);
+      color: white;
+      padding: 11px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      text-align: left;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .compare-table th.hl { background: var(--color-teal); }
+
+    .compare-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+
+    .compare-table td.hl {
+      background: var(--color-green-light);
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    .compare-table tr:last-child td { border-bottom: none; }
+    .win { color: var(--color-green); font-weight: 700; }
+
+    /* ─── VERDICT BOX ──────────────────────────────────────────── */
+    .verdict-box {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-left: 5px solid var(--color-green);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 22px 26px;
+      margin: 24px 0;
+    }
+
+    .verdict-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--color-green);
+      margin-bottom: 10px;
+    }
+
+    .verdict-box p {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--color-primary);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* ─── CTA BANNER ───────────────────────────────────────────── */
+    /*
+      This is the full-width green banner from the screenshot
+      "Get the [paddle] from [retailer] with code PROTECT21"
+      Personalize per review: paddle name + affiliate link + discount code
+    */
+    .cta-banner {
+      background: var(--color-green);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin: 36px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .cta-banner-text {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .cta-banner-text span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.75;
+      margin-top: 4px;
+    }
+
+    .btn-shop {
+      background: var(--color-orange);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .btn-shop:hover { background: var(--color-orange-hover); color: white; text-decoration: none; }
+
+    /* ─── READ MORE BUTTON ─────────────────────────────────────── */
+    .btn-read-more {
+      display: inline-block;
+      background: var(--color-orange);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 20px;
+      border-radius: var(--radius);
+      margin: 8px 0 20px;
+      transition: background 0.2s;
+    }
+
+    .btn-read-more:hover { background: var(--color-orange-hover); color: white; text-decoration: none; }
+
+    /* ─── FAQ ──────────────────────────────────────────────────── */
+    .faq { margin: 18px 0 28px; }
+
+    .faq-item {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .faq-item:first-child { border-top: 1px solid var(--color-border); }
+
+    .faq-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--color-primary);
+      font-family: var(--font-body), sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      text-align: left;
+      padding: 16px 0;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .faq-btn:hover { color: var(--color-green); }
+
+    .faq-arrow {
+      font-size: 18px;
+      color: var(--color-green);
+      transition: transform 0.25s;
+      flex-shrink: 0;
+    }
+
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+
+    .faq-item.open .faq-answer { max-height: 400px; }
+
+    .faq-answer-inner {
+      padding: 0 0 18px;
+      font-size: 14.5px;
+      color: var(--color-text);
+      line-height: 1.75;
+    }
+
+    /* ─── REVIEWER PROFILE ─────────────────────────────────────── */
+    /*
+      This is the "Reviewer Profile" block seen in the screenshot.
+      Shows author photo, name, credentials, bio excerpt.
+      Should appear at the bottom of every review.
+    */
+    .reviewer-block {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 36px 0;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .reviewer-photo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--color-green);
+      flex-shrink: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .reviewer-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+    .reviewer-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: 2px;
+    }
+
+    .reviewer-title {
+      font-size: 12px;
+      color: var(--color-secondary);
+      margin-bottom: 10px;
+    }
+
+    .reviewer-bio {
+      font-size: 14px;
+      color: var(--color-text);
+      line-height: 1.65;
+    }
+
+    .reviewer-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--color-text);
+      margin-bottom: 16px;
+    }
+
+    /* ─── RELATED POSTS ────────────────────────────────────────── */
+    /*
+      "Related Posts" section from bottom of screenshot.
+      3 cards in a row, each with thumbnail + title + excerpt.
+      Populated manually per article or via WordPress related posts plugin.
+      Future: auto-generate from content_posts BigQuery table.
+    */
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 2px solid var(--color-border);
+    }
+
+    .related-section h3 {
+      font-family: var(--font-condensed);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: 24px;
+    }
+
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 700px) { .related-grid { grid-template-columns: 1fr; } }
+
+    .related-card {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .related-card-img {
+      height: 140px;
+      overflow: hidden;
+    }
+
+    .related-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .related-card:hover .related-card-img img { transform: scale(1.04); }
+
+    .related-card-img-ph {
+      height: 140px;
+      background: var(--color-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .related-card-body { padding: 14px 16px; }
+
+    .related-card-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--color-orange);
+      margin-bottom: 6px;
+    }
+
+    .related-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .related-card-title a { color: var(--color-primary); }
+    .related-card-title a:hover { color: var(--color-green); text-decoration: none; }
+
+    .related-card-excerpt {
+      font-size: 12.5px;
+      color: var(--color-secondary);
+      line-height: 1.55;
+    }
+
+    /* ─── SIDEBAR ──────────────────────────────────────────────── */
+    .sidebar { position: sticky; top: 72px; }
+
+    .sidebar-widget {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .widget-head {
+      background: var(--color-green);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+    }
+
+    .widget-body { padding: 16px; }
+
+    /* Recent posts in sidebar */
+    .recent-post-item {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .recent-post-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .rp-thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: 4px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--color-green-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .rp-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .rp-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-primary);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .rp-title a { color: var(--color-primary); }
+    .rp-title a:hover { color: var(--color-green); }
+
+    .rp-date { font-size: 11px; color: var(--color-text); }
+
+    /* Overall score widget */
+    .score-widget {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .score-big {
+      font-size: 52px;
+      font-weight: 800;
+      font-family: var(--font-condensed);
+      color: var(--color-green);
+      line-height: 1;
+    }
+
+    .score-context strong {
+      display: block;
+      font-size: 14px;
+      color: var(--color-primary);
+      margin-bottom: 3px;
+    }
+
+    .score-context span { font-size: 13px; color: var(--color-secondary); }
+
+    /* Buy button sidebar */
+    .btn-buy {
+      display: block;
+      width: 100%;
+      background: var(--color-green);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      padding: 12px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-buy:hover { background: var(--color-teal); color: white; text-decoration: none; }
+
+    .btn-buy-alt {
+      display: block;
+      width: 100%;
+      background: transparent;
+      color: var(--color-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      padding: 9px;
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      margin-top: 8px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-buy-alt:hover { border-color: var(--color-green); color: var(--color-green); text-decoration: none; }
+
+    .discount-note {
+      font-size: 12px;
+      color: var(--color-secondary);
+      text-align: center;
+      padding-top: 10px;
+      border-top: 1px solid var(--color-border);
+      margin-top: 12px;
+    }
+
+    .code { font-family: monospace; background: var(--color-green-light); color: var(--color-green); padding: 2px 6px; border-radius: 3px; font-size: 13px; font-weight: 700; }
+
+    /* ─── FOOTER ───────────────────────────────────────────────── */
+    .site-footer {
+      background: var(--color-green);
+      color: rgba(255,255,255,0.7);
+      padding: 36px 24px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .site-footer a { color: rgba(255,255,255,0.8); }
+    .site-footer a:hover { color: white; }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ────────────────────────────────────────────────────────── -->
+<nav class="site-nav-bar">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">PE</div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#">Paddle Reviews</a></li>
+    <li><a href="#">Hot List</a></li>
+    <li><a href="#">Database</a></li>
+    <li><a href="#">Tuning Lab</a></li>
+    <li><a href="#">PE Tools ▾</a></li>
+  </ul>
+  <a href="https://pickleballeffectshop.com" class="nav-cta">Shop PE Products</a>
+</nav>
+
+<!-- ─── PAGE ────────────────────────────────────────────────────────── -->
+<div class="page-wrap">
+<div class="content-grid">
+
+  <!-- ─── MAIN ARTICLE ──────────────────────────────────────────── -->
+  <main>
+
+    <!-- HERO IMAGE BLOCK -->
+    <!--
+      HOW TO USE THIS BLOCK:
+      Option 1 (No image yet): Leave as-is — green bg with PE branding + title overlay.
+      Option 2 (Have image):   Replace the .hero-placeholder div with:
+                               <img src="paddle-photo.webp" alt="Joola Hyperion CGS 16mm – Pickleball Effect" />
+      Image size: 800 × 480px min, WebP preferred.
+      For the composite look in the screenshot (paddle photo + green overlay):
+      set the img opacity to 0.6 and the overlay handles the rest.
+    -->
+    <div class="hero-block">
+      <!-- SWAP THIS for a real image when available -->
+      <div class="hero-placeholder">
+        <div class="hero-placeholder-icon">🏓</div>
+        <div>Paddle image · 800 × 480px</div>
+      </div>
+
+      <div class="hero-content-overlay">
+        <div class="hero-badge">Full Review</div>
+        <h1 class="hero-title">Joola Hyperion CGS 16mm</h1>
+        <div class="hero-byline">
+          <div class="avatar">B</div>
+          Braydon · Pickleball Effect
+          <span class="sep">|</span>
+          April 6, 2026
+        </div>
+      </div>
+    </div>
+
+    <!-- META LINE -->
+    <div class="article-meta">
+      <span>By <strong>Braydon Donovan</strong></span>
+      <span>·</span>
+      <span>Updated April 6, 2026</span>
+      <span>·</span>
+      <span>~1,850 words · 9 min read</span>
+    </div>
+
+    <!-- ARTICLE BODY -->
+    <article class="article-body">
+
+      <div class="intro-callout">
+        The Joola Hyperion CGS 16mm is the control-first option in Joola's thermoformed lineup. Thicker core, more dwell, cleaner resets — and a real tradeoff in power. Here's what three weeks on court actually tells you about it.
+      </div>
+
+      <p>
+        Joola's been releasing paddles at a pace that's hard to keep up with. Not all of them are worth your time. This one is — but only if you know what you're buying. Let me be direct about that up front.
+      </p>
+
+      <p>
+        I played this paddle across three weeks of club sessions and a local 4.0 tournament. My focus: does the 16mm thickness actually pay off, and who's it best for?
+      </p>
+
+      <!-- TABLE OF CONTENTS — matches screenshot tab-pill style -->
+      <div class="toc-pills">
+        <div class="toc-pills-label">Table of Contents</div>
+        <div class="toc-pills-grid">
+          <a href="#specs"      class="toc-pill"><span class="num">1</span> Specs</a>
+          <a href="#scorecard"  class="toc-pill"><span class="num">2</span> Scorecard</a>
+          <a href="#testing"    class="toc-pill"><span class="num">3</span> On-Court Testing</a>
+          <a href="#pros-cons"  class="toc-pill"><span class="num">4</span> Pros &amp; Cons</a>
+          <a href="#comparison" class="toc-pill"><span class="num">5</span> Comparisons</a>
+          <a href="#verdict"    class="toc-pill"><span class="num">6</span> Buy If / Pass If</a>
+          <a href="#faq"        class="toc-pill"><span class="num">7</span> FAQ</a>
+        </div>
+      </div>
+
+      <!-- SPECS -->
+      <h2 id="specs">Specs &amp; Build Quality</h2>
+
+      <p>
+        Joola's published specs are generally accurate. My unit came in at <strong>8.3 oz</strong> static — right in their claimed 8.1–8.4 oz range. The raw carbon face is consistent edge-to-edge, and the foam-injected edge walls are solid — no flex at the throat under hard drives.
+      </p>
+
+      <table class="specs-table">
+        <thead>
+          <tr><th>Spec</th><th>Measured / Reported</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Shape</td><td>Elongated (16.5" × 7.5")</td></tr>
+          <tr><td>Core thickness</td><td>16mm</td></tr>
+          <tr><td>Static weight</td><td>8.3 oz (measured)</td></tr>
+          <tr><td>Swing weight</td><td>112 (measured)</td></tr>
+          <tr><td>Twist weight</td><td>6.4 (measured)</td></tr>
+          <tr><td>Balance</td><td>Slightly head-light</td></tr>
+          <tr><td>Face material</td><td>Raw carbon fiber</td></tr>
+          <tr><td>Core</td><td>Polypropylene honeycomb</td></tr>
+          <tr><td>Construction</td><td>Thermoformed + foam-injected edge walls</td></tr>
+          <tr><td>Spin RPMs</td><td>~1,820 RPM avg (in-house test)</td></tr>
+          <tr><td>Grip length</td><td>5.5"</td></tr>
+          <tr><td>Price</td><td>$189 (use code <strong>EFFECT</strong> for 10% off)</td></tr>
+        </tbody>
+      </table>
+
+      <!-- IMAGE: Product shot -->
+      <div class="img-block">
+        <!--
+          TYPE: product
+          Replace placeholder div below with: <img src="hyperion-face-detail.webp" alt="Joola Hyperion CGS 16mm raw carbon face detail" loading="lazy" />
+          Source: Joola press kit (email media@joola.com) or manufacturer product page.
+          Background: white or neutral gray. Cut-out PNG preferred.
+        -->
+        <div class="img-placeholder">
+          <div class="img-placeholder-icon">📷</div>
+          <div>Product Image — paddle face &amp; edge detail</div>
+          <div class="img-placeholder-tag">type: product · 800 × 480px · WebP</div>
+        </div>
+        <div class="img-caption">The raw carbon face provides strong grip and consistent spin generation across the hitting surface.</div>
+      </div>
+
+      <!-- SCORECARD -->
+      <h2 id="scorecard">Performance Scorecard</h2>
+
+      <div class="scorecard">
+        <div class="scorecard-label">Performance Ratings — /10 Scale</div>
+        <div class="score-row">
+          <span class="score-name">Power</span>
+          <div class="score-track"><div class="score-fill mid" style="width:65%"></div></div>
+          <span class="score-num">6.5</span>
+        </div>
+        <div class="score-row">
+          <span class="score-name">Pop</span>
+          <div class="score-track"><div class="score-fill mid" style="width:70%"></div></div>
+          <span class="score-num">7.0</span>
+        </div>
+        <div class="score-row">
+          <span class="score-name">Control</span>
+          <div class="score-track"><div class="score-fill" style="width:88%"></div></div>
+          <span class="score-num">8.8</span>
+        </div>
+        <div class="score-row">
+          <span class="score-name">Sweet Spot</span>
+          <div class="score-track"><div class="score-fill" style="width:82%"></div></div>
+          <span class="score-num">8.2</span>
+        </div>
+        <div class="score-row">
+          <span class="score-name">Spin</span>
+          <div class="score-track"><div class="score-fill" style="width:80%"></div></div>
+          <span class="score-num">8.0</span>
+        </div>
+        <div class="score-row">
+          <span class="score-name">Maneuverability</span>
+          <div class="score-track"><div class="score-fill" style="width:78%"></div></div>
+          <span class="score-num">7.8</span>
+        </div>
+      </div>
+
+      <!-- ON-COURT TESTING -->
+      <h2 id="testing">On-Court Feel &amp; Play Experience</h2>
+
+      <h3>Kitchen &amp; Dinking</h3>
+      <p>
+        This is where the 16mm thickness earns its keep. The paddle absorbs pace cleanly — incoming heat from drives converts into soft, angled replies with less effort than thinner cores. My resets from the transition zone were noticeably cleaner. If you play a patient, dink-heavy game, you'll feel the payoff in the first session.
+      </p>
+
+      <ul>
+        <li>Dwell time is noticeably longer than the 14mm variant</li>
+        <li>Resets from both the kitchen and mid-court carry better placement</li>
+        <li>Soft drops feel more consistent — less "bouncy" off the face</li>
+        <li>Ernie and ATP attempts are aided by the elongated shape's reach</li>
+        <li>Third-shot drops land with confidence after a short break-in period</li>
+      </ul>
+
+      <!-- IMAGE: Action / on-court shot -->
+      <div class="img-block">
+        <!--
+          TYPE: action
+          Replace placeholder with: <img src="hyperion-kitchen-play.webp" alt="Playing at the kitchen with the Joola Hyperion CGS 16mm" loading="lazy" />
+          Source options:
+            1. Braydon's court photography (best — authentic, unique, SEO-friendly)
+            2. Unsplash API: https://api.unsplash.com/search/photos?query=pickleball+kitchen
+               Free plan: 50 req/hour, must include attribution. Photo by [name] on Unsplash.
+            3. Manufacturer lifestyle shots (email for high-res)
+        -->
+        <div class="img-placeholder">
+          <div class="img-placeholder-icon">🎾</div>
+          <div>Action Shot — kitchen / dink play</div>
+          <div class="img-placeholder-tag">type: action · 800 × 480px · court photography</div>
+        </div>
+        <div class="img-caption">Three weeks of club sessions and a local tournament gave a clear picture of where this paddle earns its keep — and where it doesn't.</div>
+      </div>
+
+      <h3>Drives &amp; Power Play</h3>
+      <p>
+        Power sits at 6.5 for a reason. The thick core trades the trampoline snap of a 14mm pad for feel and control. Drives are clean and directional, but you're not overwhelming players with pace. If you rely on drives to manufacture points, this paddle will feel like a limiter.
+      </p>
+
+      <p>
+        That said — the directional accuracy on drives is a genuine strength. Placement is rewarded here. If your game is about putting the ball where you want it rather than how hard you can hit it, the tradeoff works.
+      </p>
+
+      <h3>Spin &amp; Serve</h3>
+      <p>
+        At <strong>1,820 RPM average</strong>, the raw carbon face sits in the upper-mid range. Not Ben Johns territory, but well above most fiberglass alternatives at this price. Slice serves bite well. Heavy topspin drives from the baseline generated consistent kick in the bounce — the combination of spin and dwell is a real advantage on high-arcing thirds.
+      </p>
+
+      <!-- IMAGE: Detail/closeup -->
+      <div class="img-block">
+        <!--
+          TYPE: product detail
+          Source: Manufacturer hi-res press kit, or Braydon's detail photography.
+          Subject: raw carbon fiber texture closeup, or grip/handle detail.
+        -->
+        <div class="img-placeholder">
+          <div class="img-placeholder-icon">🔍</div>
+          <div>Detail Shot — raw carbon fiber texture</div>
+          <div class="img-placeholder-tag">type: product detail · 800 × 480px</div>
+        </div>
+        <div class="img-caption">The raw carbon fiber face texture — this is what generates the 1,820 RPM spin numbers. Grip stays consistent across the full hitting surface.</div>
+      </div>
+
+      <a href="#" class="btn-read-more">Read Full Testing Notes →</a>
+
+      <!-- PROS / CONS -->
+      <h2 id="pros-cons">Pros &amp; Cons</h2>
+
+      <div class="pros-cons">
+        <div class="pc-box pros">
+          <div class="pc-label">Pros</div>
+          <ul>
+            <li>Best-in-class dink control for a thermoformed paddle</li>
+            <li>Forgiving sweet spot — off-center hits still place well</li>
+            <li>Solid 1,820 RPM spin from raw carbon face</li>
+            <li>Better maneuverability than expected at this thickness</li>
+            <li>Joola build quality — no concerns after 3 weeks</li>
+          </ul>
+        </div>
+        <div class="pc-box cons">
+          <div class="pc-label">Cons</div>
+          <ul>
+            <li>Power players will feel limited — not a banger's paddle</li>
+            <li>Pop is noticeably muted vs. the 14mm version</li>
+            <li>$189 is hard to justify without a demo</li>
+            <li>Elongated shape needs adjustment if you're used to widebody</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- COMPARISON -->
+      <h2 id="comparison">Comparisons</h2>
+
+      <p>
+        The Hyperion CGS 16mm sits in a specific niche. Here's where it lands against the closest alternatives you're likely cross-shopping:
+      </p>
+
+      <div class="compare-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Paddle</th>
+              <th class="hl">Hyperion CGS 16mm</th>
+              <th>Ben Johns 16mm</th>
+              <th>Selkirk Power Air</th>
+              <th>Franklin Signature Carbon</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Price</td>
+              <td class="hl">$189</td>
+              <td>$249</td>
+              <td>$220</td>
+              <td>$160</td>
+            </tr>
+            <tr>
+              <td>Swing Weight</td>
+              <td class="hl win">112</td>
+              <td>118</td>
+              <td>114</td>
+              <td>109</td>
+            </tr>
+            <tr>
+              <td>Control</td>
+              <td class="hl win">8.8 / 10</td>
+              <td>7.5 / 10</td>
+              <td>7.8 / 10</td>
+              <td>8.2 / 10</td>
+            </tr>
+            <tr>
+              <td>Power</td>
+              <td class="hl">6.5 / 10</td>
+              <td>8.5 / 10</td>
+              <td>7.8 / 10</td>
+              <td>7.2 / 10</td>
+            </tr>
+            <tr>
+              <td>Spin RPM</td>
+              <td class="hl">1,820</td>
+              <td>2,050</td>
+              <td>1,740</td>
+              <td>1,680</td>
+            </tr>
+            <tr>
+              <td>Best For</td>
+              <td class="hl">Dink-heavy control</td>
+              <td>All-around power</td>
+              <td>Balanced blend</td>
+              <td>Budget control</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- BUY IF / PASS IF -->
+      <h2 id="verdict">Who It's Best For</h2>
+
+      <p>
+        The Hyperion CGS 16mm is right for a specific player. Don't buy it based on brand alone.
+      </p>
+
+      <div class="buy-pass">
+        <div class="bp-box buy">
+          <div class="bp-label">Buy If</div>
+          <ul>
+            <li>You're a control-first player who lives at the kitchen</li>
+            <li>You want thermoformed construction without the power trampoline</li>
+            <li>You play a reset-and-dink game that rewards patience</li>
+            <li>You prefer a slightly head-light elongated setup</li>
+            <li>You're open to adding tungsten tape to dial in swing weight</li>
+          </ul>
+        </div>
+        <div class="bp-box pass">
+          <div class="bp-label">Pass If</div>
+          <ul>
+            <li>Your game depends on hard drives and overhead pace</li>
+            <li>You want max spin — the Ben Johns 16mm beats this clearly</li>
+            <li>You're a beginner without the mechanics to leverage the dwell</li>
+            <li>$189 without a demo doesn't sit right with you</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- VERDICT -->
+      <div class="verdict-box">
+        <div class="verdict-label">Bottom Line</div>
+        <p>The Joola Hyperion CGS 16mm earned its spot for control-first players. It's the right thermoformed paddle for the wrong player if you're shopping on brand alone — but if you're willing to give up some pop for real dink feel, it delivers. The 16mm thickness isn't a gimmick here.</p>
+      </div>
+
+      <!-- CTA BANNER — matches the green affiliate banner in the screenshot -->
+      <div class="cta-banner">
+        <div class="cta-banner-text">
+          Get the Joola Hyperion CGS 16mm
+          <span>Use code <strong>EFFECT</strong> at checkout for 10% off — affiliate link supports Pickleball Effect at no cost to you.</span>
+        </div>
+        <a href="#" class="btn-shop">SHOP NOW</a>
+      </div>
+
+      <!-- FAQ -->
+      <h2 id="faq">Frequently Asked Questions</h2>
+
+      <div class="faq">
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            Is the Hyperion CGS 16mm good for beginners?
+            <span class="faq-arrow">▾</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Not my first recommendation for beginners. The dwell and control benefits land best when you already have consistent mechanics. A beginner's inconsistent contact pattern won't get the full payoff. The Franklin Signature Carbon at $160 is a better starting point.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            How does the 16mm compare to the 14mm Hyperion CGS?
+            <span class="faq-arrow">▾</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              More control, less pop. The 14mm has a snappier feel and generates more power on drives. The 16mm gives up that snap for better dink control and more forgiving resets. If you play a dink-heavy game, the 16mm is worth the tradeoff. If you want a blend, the 14mm is more versatile.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            Can I tune this paddle with tungsten tape?
+            <span class="faq-arrow">▾</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes, and it responds well. At 112 swing weight there's room to add 1–2 strips of tungsten tape at 3 and 9 o'clock to push it into the 116–118 range if you want more drive momentum. Our <a href="#">Tuning Lab guide</a> covers the full setup process — <a href="https://pickleballeffectshop.com">tungsten tape available at the PE shop</a>.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            Where's the best place to buy it?
+            <span class="faq-arrow">▾</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Joola's site and Tennis Warehouse both carry it at $189. Use code <strong>EFFECT</strong> on Joola's site for 10% off. Occasionally drops to $169 — worth monitoring if you're not in a rush.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- REVIEWER PROFILE — matches bottom-of-article block in screenshot -->
+      <div class="reviewer-block">
+        <div class="reviewer-photo">
+          <!--
+            Replace with: <img src="braydon-photo.jpg" alt="Braydon Donovan – Pickleball Effect" />
+            Source: Braydon's headshot, consistent across all reviews.
+            Size: 128 × 128px min, square, high-res.
+          -->
+          B
+        </div>
+        <div>
+          <div class="reviewer-label">Reviewer Profile</div>
+          <div class="reviewer-name">Braydon Donovan</div>
+          <div class="reviewer-title">Founder, Pickleball Effect — Independent Equipment Reviewer</div>
+          <div class="reviewer-bio">
+            Braydon has reviewed 200+ paddles using in-house measurement tools — twistweight, swingweight, and spin RPM tested on every paddle. No brand relationships, no paid placements. Every review is court-tested, not press-kit sourced.
+          </div>
+        </div>
+      </div>
+
+    </article>
+
+    <!-- RELATED POSTS — matches bottom cards in screenshot -->
+    <div class="related-section">
+      <h3>Related Posts</h3>
+      <div class="related-grid">
+
+        <div class="related-card">
+          <!--
+            IMAGE: related article thumbnail.
+            Source: same as main article images — manufacturer or original photography.
+            Size: 400 × 280px min. Consistent crop across related cards.
+          -->
+          <div class="related-card-img-ph">🏓</div>
+          <div class="related-card-body">
+            <div class="related-card-tag">Review</div>
+            <div class="related-card-title"><a href="#">Joola Ben Johns 16mm Review</a></div>
+            <div class="related-card-excerpt">The power-forward sibling. Higher spin, more pop — but you give up the control that makes the CGS 16mm special.</div>
+          </div>
+        </div>
+
+        <div class="related-card">
+          <div class="related-card-img-ph" style="background:#8b1a1a;">🎯</div>
+          <div class="related-card-body">
+            <div class="related-card-tag">Guide</div>
+            <div class="related-card-title"><a href="#">How to Tune Your Paddle with Tungsten Tape</a></div>
+            <div class="related-card-excerpt">Step-by-step: where to place tape, how much to use, and before/after swing weight results.</div>
+          </div>
+        </div>
+
+        <div class="related-card">
+          <div class="related-card-img-ph" style="background:#1a3060;">📊</div>
+          <div class="related-card-body">
+            <div class="related-card-tag">Comparison</div>
+            <div class="related-card-title"><a href="#">Best Control Paddles 2026 — Ranked &amp; Tested</a></div>
+            <div class="related-card-excerpt">Six paddles head-to-head. Real court testing, measured specs, honest rankings. No affiliate bias.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ─── SIDEBAR ──────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <!-- Overall Score -->
+    <div class="sidebar-widget">
+      <div class="widget-head">PE Score</div>
+      <div class="widget-body">
+        <div class="score-widget">
+          <div class="score-big">8.1</div>
+          <div class="score-context">
+            <strong>Hyperion CGS 16mm</strong>
+            <span>Excellent control — best-fit for dink-heavy players</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buy widget -->
+    <div class="sidebar-widget">
+      <div class="widget-head">Get This Paddle</div>
+      <div class="widget-body">
+        <!--
+          Product image: 300 × 200px. Manufacturer hi-res PNG or cut-out.
+          Use white or green background consistent with PE style.
+        -->
+        <div style="background:#e8f2ec; border-radius:4px; height:140px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; font-size:28px;">
+          🏓
+        </div>
+        <div style="font-size:15px; font-weight:700; color:var(--color-primary); margin-bottom:4px;">Joola Hyperion CGS 16mm</div>
+        <div style="font-size:22px; font-weight:800; color:var(--color-green); margin-bottom:14px;">$189</div>
+        <a href="#" class="btn-buy">Check Price on Joola →</a>
+        <a href="#" class="btn-buy-alt">See Price History</a>
+        <div class="discount-note">Use code <span class="code">EFFECT</span> for 10% off</div>
+      </div>
+    </div>
+
+    <!-- Recent posts widget -->
+    <div class="sidebar-widget">
+      <div class="widget-head">Recent Posts</div>
+      <div class="widget-body">
+
+        <div class="recent-post-item">
+          <div class="rp-thumb">🏓</div>
+          <div>
+            <div class="rp-title"><a href="#">Enhance DUO Review — The Most Balanced Paddle This Quarter</a></div>
+            <div class="rp-date">March 28, 2026</div>
+          </div>
+        </div>
+
+        <div class="recent-post-item">
+          <div class="rp-thumb">🎯</div>
+          <div>
+            <div class="rp-title"><a href="#">Engage X2 — More Control Than Expected</a></div>
+            <div class="rp-date">March 21, 2026</div>
+          </div>
+        </div>
+
+        <div class="recent-post-item">
+          <div class="rp-thumb">📊</div>
+          <div>
+            <div class="rp-title"><a href="#">2026 Hot List: Top-Rated Paddles Right Now</a></div>
+            <div class="rp-date">March 15, 2026</div>
+          </div>
+        </div>
+
+        <div class="recent-post-item">
+          <div class="rp-thumb">⚙️</div>
+          <div>
+            <div class="rp-title"><a href="#">SLYCE Cap Review: Is the Adjustable Butt Cap Worth It?</a></div>
+            <div class="rp-date">March 10, 2026</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PE Products upsell -->
+    <div class="sidebar-widget">
+      <div class="widget-head">Tune This Paddle</div>
+      <div class="widget-body" style="font-size:13px; color:var(--color-secondary); line-height:1.65;">
+        The Hyperion CGS 16mm has room to grow. At 112 swing weight, 1–2 strips of tungsten tape at 3 &amp; 9 can dial it in.
+        <br /><br />
+        <a href="https://pickleballeffectshop.com" class="btn-buy-alt">Shop Tungsten Tape →</a>
+      </div>
+    </div>
+
+  </aside>
+
+</div><!-- /content-grid -->
+</div><!-- /page-wrap -->
+
+<!-- ─── FOOTER ──────────────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <p>© 2026 Pickleball Effect — Real testing. Real data. Honest takes.</p>
+  <p style="margin-top:8px;"><a href="#">Privacy Policy</a> · <a href="#">Affiliate Disclosure</a> · <a href="#">Contact</a></p>
+</footer>
+
+<script>
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const open = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!open) item.classList.add('open');
+  }
+</script>
+</body>
+</html>

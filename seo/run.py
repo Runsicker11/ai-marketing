@@ -35,7 +35,7 @@ def main():
     parser.add_argument("--all", action="store_true",
                         help="Run full cycle: opportunities -> generate -> score")
     parser.add_argument("--type", type=str, default="review",
-                        choices=["review", "comparison", "how_to", "landing_page"],
+                        choices=["review", "comparison", "how_to", "landing_page", "educational"],
                         help="Content type for generation (default: review)")
     parser.add_argument("--keyword", type=str, default=None,
                         help="Target keyword for content generation")

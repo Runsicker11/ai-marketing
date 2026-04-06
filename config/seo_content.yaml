@@ -31,6 +31,16 @@ content_types:
     internal_links_min: 1
     template: "templates/landing_page.md"
 
+  educational:
+    word_count: [600, 1100]
+    required_sections: [intro, explanation, why_it_matters, takeaways, shop_cta, faq]
+    keyword_placement: [title, h1, first_paragraph, meta_description]
+    internal_links_min: 2
+    # CTAs link to PE shop (pickleballeffectshop.com), not affiliate paddle links.
+    # One shop CTA per article — contextual, not bolted-on.
+    # Paddle review links used as "go deeper" references, not purchase pushes.
+    template: "templates/educational.md"
+
 seo_rules:
   title_max_chars: 60
   meta_description_max_chars: 155
