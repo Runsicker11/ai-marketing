@@ -331,6 +331,17 @@ def _load_template() -> list:
     return json.loads(_TEMPLATE_PATH.read_text(encoding="utf-8"))
 
 
+def _remove_nodes_by_ids(nodes: list, ids_to_remove: set) -> list:
+    """Recursively remove nodes (and their subtrees) whose id is in ids_to_remove."""
+    result = []
+    for node in nodes:
+        if node.get("id") in ids_to_remove:
+            continue
+        node["elements"] = _remove_nodes_by_ids(node.get("elements", []), ids_to_remove)
+        result.append(node)
+    return result
+
+
 def _find_and_update(nodes: list, target_id: str, updater) -> bool:
     """Recursively find a widget by ID and call updater(settings) on it."""
     for node in nodes:
@@ -360,6 +371,15 @@ def build_elementor_data(content: ArticleContent) -> str:
     """
     data = copy.deepcopy(_load_template())
 
+    # ── Strip Paddle Snapshot section for non-review content ──────────
+    # For comparisons (metrics={}), remove the entire Paddle Snapshot block:
+    # section1_heading (adc9cff), images container (417083a),
+    # metrics/sliders container (bbc20b8), measurements_note (8860ef3),
+    # specs_table (e9afbbc).
+    if not content.metrics:
+        _SNAPSHOT_IDS = {"adc9cff", "417083a", "bbc20b8", "8860ef3", "e9afbbc"}
+        data = _remove_nodes_by_ids(data, _SNAPSHOT_IDS)
+
     # ── Intro section ──────────────────────────────────────────────────
     _set(data, "intro_text", lambda s: s.update({"editor": content.intro_html}))
 
@@ -379,22 +399,22 @@ def build_elementor_data(content: ArticleContent) -> str:
     # ── Paddle Snapshot ────────────────────────────────────────────────
     _set(data, "section1_heading", lambda s: s.update({"title": content.section1_heading}))
 
-    if content.paddle_image1_url:
-        _set(data, "image1", lambda s: s.update({
-            "image": {"url": content.paddle_image1_url, "id": content.paddle_image1_id},
-            "caption": content.paddle_image1_caption,
-            "link": {**s.get("link", {}), "url": content.shop_url},
-        }))
+    # Always update image widgets — even if clearing them — so template defaults
+    # (Engage X2 images) never bleed through on non-review content.
+    _set(data, "image1", lambda s: s.update({
+        "image": {"url": content.paddle_image1_url, "id": content.paddle_image1_id},
+        "caption": content.paddle_image1_caption,
+        "link": {**s.get("link", {}), "url": content.shop_url or ""},
+    }))
 
-    if content.paddle_image2_url:
-        _set(data, "image2", lambda s: s.update({
-            "image": {"url": content.paddle_image2_url, "id": content.paddle_image2_id},
-            "caption": content.paddle_image2_caption,
-            "link": {**s.get("link", {}), "url": content.shop_url},
-        }))
+    _set(data, "image2", lambda s: s.update({
+        "image": {"url": content.paddle_image2_url, "id": content.paddle_image2_id},
+        "caption": content.paddle_image2_caption,
+        "link": {**s.get("link", {}), "url": content.shop_url or ""},
+    }))
 
     _set(data, "metrics_html", lambda s: s.update({
-        "html": _build_metrics_html(content.metrics)
+        "html": _build_metrics_html(content.metrics) if content.metrics else ""
     }))
 
     _set(data, "slider_soft_stiff", lambda s: s.update({
@@ -405,29 +425,30 @@ def build_elementor_data(content: ArticleContent) -> str:
         "html": _build_slider_html("Dense", "Hollow", content.feel_dense_hollow_pct)
     }))
 
-    if content.paddle_info_bullets_html:
-        _set(data, "paddle_info_bullets", lambda s: s.update({
-            "editor": content.paddle_info_bullets_html
-        }))
-
-    _set(data, "measurements_note", lambda s: s.update({
-        "editor": f"<p>{content.measurements_note}</p>"
+    # Always update — clear Engage X2 defaults when no content provided
+    _set(data, "paddle_info_bullets", lambda s: s.update({
+        "editor": content.paddle_info_bullets_html or ""
     }))
 
-    if content.specs_table_html:
-        _set(data, "specs_table", lambda s: s.update({"editor": content.specs_table_html}))
+    _set(data, "measurements_note", lambda s: s.update({
+        "editor": f"<p>{content.measurements_note}</p>" if content.measurements_note else ""
+    }))
+
+    _set(data, "specs_table", lambda s: s.update({
+        "editor": content.specs_table_html or ""
+    }))
 
     # ── On-Court section ───────────────────────────────────────────────
     _set(data, "section2_heading", lambda s: s.update({"title": content.section2_heading}))
 
-    if content.video_url:
-        _set(data, "video", lambda s: s.update({
-            "youtube_url": content.video_url,
-            **({"image_overlay": {
-                "url": content.video_thumbnail_url,
-                "id": content.video_thumbnail_id,
-            }} if content.video_thumbnail_url else {}),
-        }))
+    # Always update the video widget to prevent template defaults bleeding through.
+    _set(data, "video", lambda s: s.update({
+        "youtube_url": content.video_url or "",
+        **({"image_overlay": {
+            "url": content.video_thumbnail_url,
+            "id": content.video_thumbnail_id,
+        }} if content.video_thumbnail_url else {}),
+    }))
 
     if content.section2_body_html:
         _set(data, "section2_body", lambda s: s.update({"editor": content.section2_body_html}))
@@ -471,22 +492,19 @@ def build_elementor_data(content: ArticleContent) -> str:
         },
     }))
 
-    # ── Product sidebar ────────────────────────────────────────────────
-    if content.product_image_url:
-        _set(data, "product_image", lambda s: s.update({
-            "image": {"url": content.product_image_url, "id": content.product_image_id},
-        }))
+    # ── Product sidebar — always update to clear template defaults ────────
+    _set(data, "product_image", lambda s: s.update({
+        "image": {"url": content.product_image_url, "id": content.product_image_id},
+    }))
 
-    if content.product_name:
-        _set(data, "product_name", lambda s: s.update({"title": content.product_name}))
+    _set(data, "product_name", lambda s: s.update({"title": content.product_name or ""}))
 
     _set(data, "sidebar_btn", lambda s: s.update({
         "text": content.sidebar_button_text,
         "link": {**s.get("link", {}), "url": content.sidebar_url or content.shop_url, "is_external": "on"},
     }))
 
-    if content.sidebar_code_html:
-        _set(data, "sidebar_code", lambda s: s.update({"editor": content.sidebar_code_html}))
+    _set(data, "sidebar_code", lambda s: s.update({"editor": content.sidebar_code_html or ""}))
 
     log.info(f"Elementor template built for: {content.title}")
     return json.dumps(data, ensure_ascii=False)

@@ -41,6 +41,105 @@ def _load_template(content_type: str) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _fetch_pe_review_content(keyword: str, content_type: str) -> str:
+    """Fetch PE review content for paddles referenced in the keyword.
+
+    For comparisons ("X vs Y"), fetches both reviews.
+    For single reviews, fetches the one review.
+    Returns combined source text, or empty string on failure.
+    """
+    if content_type not in ("comparison", "review"):
+        return ""
+
+    if " vs " in keyword.lower():
+        parts = re.split(r"\s+vs\s+", keyword, flags=re.IGNORECASE)
+        paddle_names = [p.strip() for p in parts]
+    else:
+        paddle_names = [keyword.strip()]
+
+    sections = []
+    for name in paddle_names:
+        content = _search_and_fetch_wp_review(name)
+        if content:
+            sections.append(f"### PE Review: {name.title()}\n{content}")
+        else:
+            log.warning(f"No PE review content found for '{name}'")
+
+    return "\n\n".join(sections)
+
+
+def _search_and_fetch_wp_review(paddle_name: str) -> str:
+    """Search WordPress REST API for a review post, then fetch its rendered page.
+
+    Returns plain-text review content (up to ~4000 chars), or empty string.
+    """
+    import requests as _req
+
+    base = "https://pickleballeffect.com"
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        )
+    }
+
+    # ── Step 1: Find the post via WP REST API ─────────────────────────
+    try:
+        resp = _req.get(
+            f"{base}/wp-json/wp/v2/posts",
+            params={"search": paddle_name, "per_page": 10, "status": "publish"},
+            headers=headers,
+            timeout=15,
+        )
+        resp.raise_for_status()
+        posts = resp.json()
+    except Exception as exc:
+        log.warning(f"WP REST search failed for '{paddle_name}': {exc}")
+        return ""
+
+    if not posts:
+        return ""
+
+    # Score results by how many paddle-name words appear in the URL/title.
+    # URL match weighted 2x — slugs are more reliable than body mentions.
+    def _score(post: dict) -> int:
+        url = post.get("link", "").lower()
+        title = post.get("title", {}).get("rendered", "").lower()
+        words = paddle_name.lower().split()
+        return sum(2 if w in url else (1 if w in title else 0) for w in words)
+
+    posts_in_reviews = [p for p in posts if "equipment-review" in p.get("link", "")]
+    candidates = posts_in_reviews or posts
+    post = max(candidates, key=_score)
+
+    # Require at least one word match; bail if nothing relevant found
+    if _score(post) == 0:
+        log.warning(f"No relevant WP post found for '{paddle_name}' (best match: {post.get('link', '')})")
+        return ""
+    title = post.get("title", {}).get("rendered", paddle_name)
+    page_url = post.get("link", "")
+
+    # ── Step 2: Extract text from REST API rendered content ────────────
+    # content.rendered contains the full Elementor HTML — strip tags to get
+    # plain text. This is more reliable than fetching the page directly,
+    # which requires parsing Cloudflare-served HTML with Elementor structure.
+    content_html = post.get("content", {}).get("rendered", "")
+    if not content_html:
+        log.warning(f"No content in REST API response for '{paddle_name}'")
+        return ""
+
+    text = re.sub(r"<[^>]+>", " ", content_html)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    MAX_CHARS = 5000
+    if len(text) > MAX_CHARS:
+        text = text[:MAX_CHARS] + "…"
+
+    log.info(f"Fetched PE review for '{paddle_name}': {len(text)} chars — {page_url}")
+    return f"[Source: {page_url}]\n[Title: {title}]\n\n{text}"
+
+
 def _load_product_data(product: str | None) -> str:
     """Load product data from BigQuery."""
     if product:
@@ -323,6 +422,7 @@ def generate_article(
     template = _load_template(content_type)
     product_data = _load_product_data(product)
     existing_content = _load_existing_content()
+    pe_source = _fetch_pe_review_content(target_keyword, content_type)
 
     type_config = config.get("content_types", {}).get(content_type, {})
     seo_rules = config.get("seo_rules", {})
@@ -336,6 +436,20 @@ def generate_article(
         f"## Product Data\n{product_data}\n\n"
         f"## Existing Content (for internal links)\n{existing_content}"
     )
+    if pe_source:
+        data_context += (
+            f"\n\n## PE Source Review Content\n"
+            f"(Actual on-court notes, specs, and measurements from Pickleball Effect reviews — "
+            f"use these as the authoritative source for all technical details)\n\n"
+            f"{pe_source}"
+        )
+
+    source_note = (
+        "\n\nSOURCE REQUIREMENT: PE review content is provided above. "
+        "Use those actual specs, measurements, and on-court assessments verbatim — "
+        "do NOT invent or estimate paddle specifications. "
+        "If a spec is not mentioned in the source reviews, omit it rather than guessing."
+    ) if pe_source else ""
 
     question = (
         f"Write a complete {content_type} article targeting the keyword "
@@ -350,6 +464,7 @@ def generate_article(
         f"Output the COMPLETE article in markdown with frontmatter "
         f"(title, meta_description, target_keyword, slug). "
         f"Write every section fully — no placeholders or TODOs."
+        f"{source_note}"
     )
 
     response = analyze(_build_system_prompt(content_type), data_context, question)
@@ -402,6 +517,10 @@ def _parse_frontmatter(text: str, default_keyword: str) -> tuple[str, str, str]:
     meta_description = ""
     slug = default_keyword.lower().replace(" ", "-")
 
+    # Strip markdown code fences if the AI wrapped the response
+    text = re.sub(r"^```(?:markdown)?\s*\n", "", text.strip(), flags=re.IGNORECASE)
+    text = re.sub(r"\n```\s*$", "", text.strip())
+
     # Try YAML frontmatter
     fm_match = re.match(r"^---\s*\n(.*?)\n---", text, re.DOTALL)
     if fm_match:
@@ -423,7 +542,9 @@ def _parse_frontmatter(text: str, default_keyword: str) -> tuple[str, str, str]:
 
 
 def _strip_frontmatter(text: str) -> str:
-    """Remove YAML frontmatter from content."""
+    """Remove YAML frontmatter and any wrapping markdown code fences from content."""
+    text = re.sub(r"^```(?:markdown)?\s*\n", "", text.strip(), flags=re.IGNORECASE)
+    text = re.sub(r"\n```\s*$", "", text.strip())
     return re.sub(r"^---\s*\n.*?\n---\s*\n", "", text, flags=re.DOTALL).strip()
 
 

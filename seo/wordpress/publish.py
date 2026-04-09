@@ -138,6 +138,9 @@ def publish_with_elementor(
     categories: list[int] | None = None,
     tags: list[int] | None = None,
     status: str = "draft",
+    target_keyword: str = "",
+    content_type: str = "review",
+    word_count: int = 0,
 ) -> dict:
     """Create a WordPress post with full Elementor layout cloned from review_template.json.
 
@@ -212,11 +215,11 @@ def publish_with_elementor(
         "post_id": f"wp_{post_id}",
         "platform": "wordpress",
         "title": content.title,
-        "target_keyword": "",   # caller can update BQ directly if needed
-        "content_type": "review",
+        "target_keyword": target_keyword,
+        "content_type": content_type,
         "status": status,
         "url": final_post.get("link", ""),
-        "word_count": 0,
+        "word_count": word_count,
         "publish_date": None,
         "created_at": now_str,
         "updated_at": now_str,
