@@ -18,6 +18,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=/app
 
 # Secret Manager mounts .env at /secrets/.env — copy it into /app at runtime
-# Weekday schedule: alerts + optimization proposals (Slack notified)
-# Weekly strategy runs on Sundays (day 0)
-CMD ["sh", "-c", "cp /secrets/.env /app/.env 2>/dev/null; python -m ingestion.analysis.run --alerts; python -m ingestion.analysis.run --optimize; if [ $(date -u +%w) -eq 1 ]; then python -m ingestion.analysis.run --weekly; fi"]
+# Daily:   alerts + optimization proposals (Slack notified)
+# Monday:  + gads-health (30-rule account audit, 8am UTC via separate trigger)
+#          + weekly strategy report
+CMD ["sh", "-c", "cp /secrets/.env /app/.env 2>/dev/null; python -m ingestion.analysis.run --alerts; python -m ingestion.analysis.run --optimize; if [ $(date -u +%w) -eq 1 ]; then python -m ingestion.analysis.run --gads-health; python -m ingestion.analysis.run --weekly; fi"]

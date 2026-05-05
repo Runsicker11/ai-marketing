@@ -38,6 +38,26 @@ autonomy_levels:
     - "launch_new_creative"
     - "keyword_changes"
 
+gads_health:
+  roas_warn_floor: 2.5             # Campaign 7-day ROAS below this triggers WARN
+  campaign_min_spend_7d: 20.0      # Min spend to evaluate ROAS (avoid noise on tiny campaigns)
+  zero_conv_spend_floor: 50.0      # Campaign spend floor for zero-conversion alert (14d)
+  spend_anomaly_pct: 25            # Alert if yesterday spend deviates >25% from 7-day avg
+  impression_share_brand_floor: 0.50  # Brand search IS below 50% = WARN
+  waste_term_floor_7d: 10.0        # Single search term wasting ≥$10 in 7 days
+  total_waste_pct_warn: 20.0       # Total wasted spend >20% of weekly spend
+  quality_score_floor: 5           # Keyword QS below this = WARN
+  kw_spend_floor_30d: 5.0          # Min 30-day spend to flag a QS issue
+  keyword_waste_floor: 30.0        # Keyword all-time wasted spend floor for WARN
+  broad_match_pct_warn: 40.0       # Broad match >40% of campaign spend = WARN
+  shopping_roas_floor: 2.5         # Shopping 7-day ROAS floor
+  shopping_min_spend_7d: 30.0      # Min Shopping spend to evaluate ROAS
+  product_waste_floor_7d: 15.0     # Product wasted spend floor per 7 days
+  budget_minimum: 10.0             # ENABLED campaign daily budget minimum
+  cpc_spike_multiplier: 2.0        # CPC > 2× 14-day avg triggers WARN
+  account_cvr_floor: 0.005         # Account CVR floor (0.5%)
+  account_cvr_min_spend: 100.0     # Min weekly spend to evaluate account CVR
+
 autonomy:
   shadow_mode: true                # Proposals created, never auto-executed
   max_proposals_per_run: 10        # Cap proposals per --propose invocation

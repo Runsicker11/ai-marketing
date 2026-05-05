@@ -25,6 +25,8 @@ def main():
                         help="Target month YYYY-MM (default: last completed month)")
     parser.add_argument("--optimize", action="store_true",
                         help="Run optimization proposals (search terms + budget)")
+    parser.add_argument("--gads-health", action="store_true", dest="gads_health",
+                        help="Run Google Ads health check (30 rules, Slack summary)")
     parser.add_argument("--all", action="store_true",
                         help="Run daily + alerts + weekly + dashboard")
     parser.add_argument("--print", action="store_true", dest="to_stdout",
@@ -32,7 +34,7 @@ def main():
     args = parser.parse_args()
 
     if not any([args.daily, args.alerts, args.weekly, args.dashboard,
-                args.optimize, args.all]):
+                args.optimize, args.gads_health, args.all]):
         parser.print_help()
         sys.exit(1)
 
@@ -61,6 +63,11 @@ def main():
             log.info("=== Monthly Dashboard ===")
             from ingestion.analysis.dashboard import generate as gen_dashboard
             gen_dashboard(month=args.month, to_stdout=args.to_stdout)
+
+        if args.gads_health:
+            log.info("=== Google Ads Health Check ===")
+            from ingestion.analysis.gads_health_check import run as run_gads_health
+            run_gads_health(to_stdout=args.to_stdout)
 
         if args.optimize:
             log.info("=== Optimization Proposals ===")
