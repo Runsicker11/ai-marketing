@@ -512,7 +512,7 @@ def _query_new_customers(t_start, t_end, p_start, p_end) -> dict:
     WITH first_orders AS (
         -- Find each customer's first order date
         SELECT customer_id, MIN(order_date) AS first_order_date
-        FROM `{_DS}.shopify_orders`
+        FROM `{GCP_PROJECT_ID}.stg_shopify.stg_shopify__orders`
         WHERE customer_id IS NOT NULL
         GROUP BY customer_id
     ),
@@ -526,7 +526,7 @@ def _query_new_customers(t_start, t_end, p_start, p_end) -> dict:
                 WHEN o.order_date BETWEEN '{t_start}' AND '{t_end}' THEN 'target'
                 ELSE 'prior'
             END AS period
-        FROM `{_DS}.shopify_orders` o
+        FROM `{GCP_PROJECT_ID}.stg_shopify.stg_shopify__orders` o
         JOIN first_orders fo ON o.customer_id = fo.customer_id
             AND o.order_date = fo.first_order_date
         WHERE o.order_date BETWEEN '{p_start}' AND '{t_end}'
